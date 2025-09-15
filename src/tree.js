@@ -35,7 +35,7 @@ export function buildTree(data) {
         const nodeId = nodeIDCounter++;
         
 
-        const children = childrenMap.get(nodeName);
+        const children = childrenMap.get(nodeName) || [];
 
         return {
             id: nodeId,
