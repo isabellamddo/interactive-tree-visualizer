@@ -7,6 +7,19 @@ const TreeVisualization = ({ treeData }) => {
     return nodeData.children;
   }
 
+  function createLink(childNode, parentNode) {
+    const childX = childNode.x;
+    const childY = childNode.y;
+    const parentX = parentNode.x;
+    const parentY = parentNode.y;
+
+    // M: move to
+    // L: draw line to
+    const pathString = `M${childX},${childY} L${parentX},${parentY}`;
+
+    return pathString;
+  }
+
 
   // End helper functions
 
@@ -15,6 +28,8 @@ const TreeVisualization = ({ treeData }) => {
   useEffect(() => {
     if (!treeData) return;
     const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove(); // Clear old diagrams
+
 
     const width = window.innerWidth - 40;
     const height = 1200;
@@ -46,30 +61,45 @@ const TreeVisualization = ({ treeData }) => {
       node.y = node.depth * 200; // 200px between each level
     }
 
+    // LINKS
+    const linkSelection = mainGroup.selectAll('path.link');
+    const linkData = linkSelection.data(allLinks);
+    const linkPaths = linkData.enter().append('path');
 
+    // Style the lines
+    linkPaths.attr('class', 'link');
+    linkPaths.style('stroke', '#000000ff');
+    linkPaths.attr('d', function (linkNode) {
+      return createLink(linkNode, linkNode.parent);
+    });
+
+    // NODES
     const nodeSelection = mainGroup.selectAll('g.node');
-
-    // Bind node data  
     const nodeData = nodeSelection.data(allNodes);
 
-    // Create group element for each node
+    // Create group element for each node to make moving rectangle and text together easier
     const nodeGroups = nodeData.enter().append('g');
 
     const rectangles = nodeGroups.append('rect');
-
-    const textLabels = nodeGroups.append('text');
+    rectangles.attr('width', 120);
+    rectangles.attr('height', 35);
+    rectangles.attr('x', -60); // Align center 
+    rectangles.attr('y', -17.5);
+    rectangles.style('fill', '#cae9f5');
 
     nodeGroups.attr('class', 'node');
-    nodeGroups.attr('transform', function(node) {
+    nodeGroups.attr('transform', function (node) {
       return `translate(${node.x},${node.y})`;
     });
+
+    const textLabels = nodeGroups.append('text');
+    textLabels.attr('text-anchor', 'middle');
 
     textLabels.text(function (node) {
       return node.data.name;
     });
 
   }, [treeData]);
-
 
 
   return (
