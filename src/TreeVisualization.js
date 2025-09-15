@@ -7,6 +7,10 @@ const TreeVisualization = ({ treeData }) => {
     return nodeData.children;
   }
 
+  function getNodeName(node) {
+    return node.data.name;
+  }
+
   function createLink(childNode, parentNode) {
     const childX = childNode.x;
     const childY = childNode.y;
@@ -88,16 +92,16 @@ const TreeVisualization = ({ treeData }) => {
     rectangles.style('fill', '#cae9f5');
 
     nodeGroups.attr('class', 'node');
-    nodeGroups.attr('transform', function (node) {
+    function positionNode(node) {
       return `translate(${node.x},${node.y})`;
-    });
+    }
+
+    nodeGroups.attr('transform', positionNode);
 
     const textLabels = nodeGroups.append('text');
     textLabels.attr('text-anchor', 'middle');
-
-    textLabels.text(function (node) {
-      return node.data.name;
-    });
+    textLabels.attr('dy', '0.35em'); // Vertical centering
+    textLabels.text(getNodeName);
 
   }, [treeData]);
 
