@@ -27,7 +27,10 @@ const TreeVisualization = ({ treeData }) => {
     mainGroup.attr("transform", `translate(${margin.left},${margin.top})`);
 
     const treemap = d3.tree();
-    treemap.size(width, height);
+    const layoutWidth = width - margin.left - margin.right;
+    const layoutHeight = height - margin.top - margin.bottom;
+    treemap.size([layoutWidth, layoutHeight]);
+
 
     // Passing in helper function will apply the fcuntion to each item in treeData
     const root = d3.hierarchy(treeData, getChildren);
@@ -38,6 +41,32 @@ const TreeVisualization = ({ treeData }) => {
     // Descendants orders nodes, root is always first
     const allNodes = treeWithPositions.descendants();
     const allLinks = treeWithPositions.descendants().slice(1); // Don't include root in nodes tha tneed links
+
+    for (const node of allNodes) {
+      node.y = node.depth * 200; // 200px between each level
+    }
+
+
+    const nodeSelection = mainGroup.selectAll('g.node');
+
+    // Bind node data  
+    const nodeData = nodeSelection.data(allNodes);
+
+    // Create group element for each node
+    const nodeGroups = nodeData.enter().append('g');
+
+    const rectangles = nodeGroups.append('rect');
+
+    const textLabels = nodeGroups.append('text');
+
+    nodeGroups.attr('class', 'node');
+    nodeGroups.attr('transform', function(node) {
+      return `translate(${node.x},${node.y})`;
+    });
+
+    textLabels.text(function (node) {
+      return node.data.name;
+    });
 
   }, [treeData]);
 
