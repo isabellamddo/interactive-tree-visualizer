@@ -59,7 +59,7 @@ const TreeVisualization = ({ treeData }) => {
 
   useEffect(() => {
     if (!treeData) return;
-    
+
     let i = 0;
 
     // Container for diagram
@@ -109,6 +109,13 @@ const TreeVisualization = ({ treeData }) => {
       node.y = node.depth * 150 + margin.top;
       node.x = node.x + margin.left;
     }
+
+    mainGroup.selectAll('path.link')
+      .data(allLinks, d => d.id || (d.id = ++i))
+      .join('path')
+      .attr('class', 'link')
+      .style('stroke', '#000')
+      .attr('d', d => createLink(d, d.parent));
 
     // Staggering to condense diagram
     const nodesByLevel = {};
@@ -160,8 +167,17 @@ const TreeVisualization = ({ treeData }) => {
         d.children = d._children;
         d._children = null;
       }
-      // Have to rerender tree
-      console.log('Node clicked:', d.data.name);
+
+
+      const treeWithPositions = treemap(root);
+      const allNodes = treeWithPositions.descendants();
+      const allLinks = treeWithPositions.descendants().slice(1);
+
+      for (const node of allNodes) {
+        node.y = node.depth * 150 + margin.top;
+        node.x = node.x + margin.left;
+      }
+
     });
 
     nodeGroups.style('cursor', 'pointer');
