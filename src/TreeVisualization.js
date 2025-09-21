@@ -29,6 +29,18 @@ const TreeVisualization = ({ treeData }) => {
     return colors[node.depth % colors.length];
   }
 
+  function positionNode(node) {
+    return `translate(${node.x},${node.y})`;
+  }
+
+  function collapse(d) {
+    if (d.children) {
+      d._children = d.children;  // Store children in _children
+      d._children.forEach(collapse);
+      d.children = null;  // Hide children
+    }
+  }
+
 
   // End helper functions
 
@@ -36,6 +48,8 @@ const TreeVisualization = ({ treeData }) => {
 
   useEffect(() => {
     if (!treeData) return;
+
+    // Container for diagram
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear old diagrams
 
@@ -50,6 +64,16 @@ const TreeVisualization = ({ treeData }) => {
     const mainGroup = svg.append("g");
     mainGroup.attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // Drag and zoom
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 3])
+      .on("zoom", (event) => {
+        mainGroup.attr("transform", event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Tree structure
     const treemap = d3.tree();
     const layoutWidth = width - margin.left - margin.right;
     const layoutHeight = height - margin.top - margin.bottom;
@@ -57,7 +81,11 @@ const TreeVisualization = ({ treeData }) => {
 
     const root = d3.hierarchy(treeData, getChildren);
 
-    // Adds coordinates to all nodes for positioning starting with root node working down
+
+    // Collapse and expand
+    root.children.forEach(collapse);
+
+    // Adds coordinates to all nodes for positioning starting with root
     const treeWithPositions = treemap(root);
 
     // Descendants orders nodes
@@ -65,10 +93,11 @@ const TreeVisualization = ({ treeData }) => {
     const allLinks = treeWithPositions.descendants().slice(1); // Don't include root in nodes tha tneed links
 
     for (const node of allNodes) {
-      node.y = node.depth * 150 + margin.top; // 200px between each level
+      node.y = node.depth * 150 + margin.top;
       node.x = node.x + margin.left;
     }
 
+    // Staggering to condense diagram
     const nodesByLevel = {};
     for (const node of allNodes) {
       if (!nodesByLevel[node.depth]) {
@@ -109,13 +138,24 @@ const TreeVisualization = ({ treeData }) => {
     const nodeGroups = nodeData.enter().append('g');
 
     nodeGroups.attr('class', 'node');
-    function positionNode(node) {
-      return `translate(${node.x},${node.y})`;
-    }
+
+    nodeGroups.on('click', function (event, d) {
+      if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else if (d._children) {
+        d.children = d._children;
+        d._children = null;
+      }
+      // Have to rerender tree
+      console.log('Node clicked:', d.data.name);
+    });
+
+    nodeGroups.style('cursor', 'pointer');
 
     nodeGroups.attr('transform', positionNode);
 
-    // Text
+    // TEXT
     const textGroups = nodeGroups.append('g').attr('class', 'text-group');
 
     textGroups.each(function (node) {
@@ -167,7 +207,7 @@ const TreeVisualization = ({ treeData }) => {
         firstTspan.attr('dy', `${-totalLines * 0.3 + 0.35}em`);
       }
 
-      // Add rectangles after text
+      // RECTANGLES
       const rect = nodeGroup.append('rect');
       const bbox = text.node().getBBox();
 
@@ -187,11 +227,13 @@ const TreeVisualization = ({ treeData }) => {
 
   }, [treeData]);
 
-
-
+  // React
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
       <h2>Tree Visualization</h2>
+      <p style={{ fontSize: "14px", color: "#666" }}>
+        Click nodes to expand/collapse
+      </p>
       <div style={{ border: "1px solid #ccc", height: "600px", overflow: "auto" }}>
         <svg ref={svgRef} ></svg>
       </div>
