@@ -22,6 +22,11 @@ const TreeVisualization = ({ treeData }) => {
     const pathString = `M${childX},${childY} L${parentX},${parentY}`;
 
     return pathString;
+
+  }
+  function getNodeColor(node) {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+    return colors[node.depth % colors.length];
   }
 
 
@@ -50,19 +55,39 @@ const TreeVisualization = ({ treeData }) => {
     const layoutHeight = height - margin.top - margin.bottom;
     treemap.size([layoutWidth, layoutHeight]);
 
-
-    // Passing in helper function will apply the fcuntion to each item in treeData
     const root = d3.hierarchy(treeData, getChildren);
 
     // Adds coordinates to all nodes for positioning starting with root node working down
     const treeWithPositions = treemap(root);
 
-    // Descendants orders nodes, root is always first
+    // Descendants orders nodes
     const allNodes = treeWithPositions.descendants();
     const allLinks = treeWithPositions.descendants().slice(1); // Don't include root in nodes tha tneed links
 
     for (const node of allNodes) {
-      node.y = node.depth * 200; // 200px between each level
+      node.y = node.depth * 150 + margin.top; // 200px between each level
+      node.x = node.x + margin.left;
+    }
+
+    const nodesByLevel = {};
+    for (const node of allNodes) {
+      if (!nodesByLevel[node.depth]) {
+        nodesByLevel[node.depth] = [];
+      }
+
+      nodesByLevel[node.depth].push(node);
+    }
+
+    const levelKeys = Object.keys(nodesByLevel);
+    for (const level of levelKeys) {
+      const levelNodes = nodesByLevel[level];
+
+      for (let index = 0; index < levelNodes.length; index++) {
+        const node = levelNodes[index];
+
+        const staggerOffset = (index % 3) * 20 - 20;
+        node.y = node.y + staggerOffset;
+      }
     }
 
     // LINKS
@@ -70,7 +95,6 @@ const TreeVisualization = ({ treeData }) => {
     const linkData = linkSelection.data(allLinks);
     const linkPaths = linkData.enter().append('path');
 
-    // Style the lines
     linkPaths.attr('class', 'link');
     linkPaths.style('stroke', '#000000ff');
     linkPaths.attr('d', function (linkNode) {
@@ -84,13 +108,6 @@ const TreeVisualization = ({ treeData }) => {
     // Create group element for each node to make moving rectangle and text together easier
     const nodeGroups = nodeData.enter().append('g');
 
-    const rectangles = nodeGroups.append('rect');
-    rectangles.attr('width', 120);
-    rectangles.attr('height', 35);
-    rectangles.attr('x', -60); // Align center 
-    rectangles.attr('y', -17.5);
-    rectangles.style('fill', '#cae9f5');
-
     nodeGroups.attr('class', 'node');
     function positionNode(node) {
       return `translate(${node.x},${node.y})`;
@@ -98,12 +115,78 @@ const TreeVisualization = ({ treeData }) => {
 
     nodeGroups.attr('transform', positionNode);
 
-    const textLabels = nodeGroups.append('text');
-    textLabels.attr('text-anchor', 'middle');
-    textLabels.attr('dy', '0.35em'); // Vertical centering
-    textLabels.text(getNodeName);
+    // Text
+    const textGroups = nodeGroups.append('g').attr('class', 'text-group');
+
+    textGroups.each(function (node) {
+      const nodeGroup = d3.select(this);
+      const name = getNodeName(node);
+      const maxWidth = 120;
+
+      const text = nodeGroup.append('text')
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Arial, sans-serif')
+        .style('font-size', '11px')
+        .style('pointer-events', 'none');
+
+      const words = name.split(/\s+/);
+
+      text.text(name);
+
+      // Wrap text if to long
+      if (text.node().getComputedTextLength() > maxWidth) {
+        text.text(null);
+
+        let line = [];
+        let lineNumber = 0;
+        const lineHeight = 1.1;
+
+        let tspan = text.append('tspan')
+          .attr('x', 0)
+          .attr('dy', '0.35em');
+
+        words.forEach(word => {
+          line.push(word);
+          tspan.text(line.join(' '));
+
+          if (tspan.node().getComputedTextLength() > maxWidth && line.length > 1) {
+            line.pop();
+            tspan.text(line.join(' '));
+            line = [word];
+            lineNumber++;
+            tspan = text.append('tspan')
+              .attr('x', 0)
+              .attr('dy', lineHeight + 'em')
+              .text(word);
+          }
+        });
+
+        // Vertically center multi-line text
+        const totalLines = lineNumber + 1;
+        const firstTspan = text.select('tspan');
+        firstTspan.attr('dy', `${-totalLines * 0.3 + 0.35}em`);
+      }
+
+      // Add rectangles after text
+      const rect = nodeGroup.append('rect');
+      const bbox = text.node().getBBox();
+
+      const paddingX = 15;
+      const paddingY = 10;
+
+      rect.attr('x', bbox.x - paddingX)
+        .attr('y', bbox.y - paddingY)
+        .attr('width', bbox.width + paddingX * 2)
+        .attr('height', bbox.height + paddingY * 2)
+        .style('fill', getNodeColor(node))
+        .style('stroke', '#333')
+        .style('stroke-width', '1px');
+
+      rect.lower();
+    });
 
   }, [treeData]);
+
 
 
   return (
