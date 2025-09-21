@@ -35,9 +35,20 @@ const TreeVisualization = ({ treeData }) => {
 
   function collapse(d) {
     if (d.children) {
-      d._children = d.children;  // Store children in _children
+      d._children = d.children;
       d._children.forEach(collapse);
-      d.children = null;  // Hide children
+      d.children = null;
+    }
+  }
+
+
+  function expand(d) {
+    if (d._children) {
+      d.children = d._children;
+      d._children = null;
+    }
+    if (d.children) {
+      d.children.forEach(expand);
     }
   }
 
@@ -48,6 +59,8 @@ const TreeVisualization = ({ treeData }) => {
 
   useEffect(() => {
     if (!treeData) return;
+    
+    let i = 0;
 
     // Container for diagram
     const svg = d3.select(svgRef.current);
