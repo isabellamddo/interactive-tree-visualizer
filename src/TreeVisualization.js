@@ -1,4 +1,4 @@
-import React, { useEffect, useRef , useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 const TreeVisualization = ({ treeData }) => {
@@ -43,14 +43,14 @@ const TreeVisualization = ({ treeData }) => {
   }
 
   function expand(d) {
-  if (d._children) {
-    d.children = d._children;
-    d._children = null;
+    if (d._children) {
+      d.children = d._children;
+      d._children = null;
+    }
+    if (d.children) {
+      d.children.forEach(expand);
+    }
   }
-  if (d.children) {
-    d.children.forEach(expand);
-  }
-}
 
   // End helper functions
 
@@ -67,14 +67,22 @@ const TreeVisualization = ({ treeData }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear old diagrams
 
-    const width = window.innerWidth - 40;
-    const height = 1200;
+    const containerWidth = 1200;
+    const containerHeight = 800;
+    const width = 4000;
+    const height = 3000;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
-    svg.attr("width", width).attr("height", height);
+    svg.attr("width", containerWidth).attr("height", containerHeight);
 
-    const mainGroup = svg.append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+    const zoom = d3.zoom()
+      .scaleExtent([0.05, 5])
+      .on("zoom", (event) => {
+        mainGroup.attr("transform", event.transform);
+      });
+    svg.call(zoom);
+
+    const mainGroup = svg.append("g");
 
     // Tree layout
     const treemap = d3.tree();
@@ -91,7 +99,7 @@ const TreeVisualization = ({ treeData }) => {
     function update(source) {
       const treeWithPositions = treemap(root);
       const allNodes = treeWithPositions.descendants();
-      const allLinks = treeWithPositions.descendants().slice(1);
+      const allLinks = treeWithPositions.links();
 
       // Descendants orders nodes
       for (const node of allNodes) {
@@ -123,10 +131,10 @@ const TreeVisualization = ({ treeData }) => {
         .style('stroke', '#999')
         .style('stroke-width', '1.5px')
         .style('opacity', 0.6)
-        .attr('d', d => createLink(d, d.parent));
+        .attr('d', d => createLink(d.target, d.source));
 
       linkSelection
-        .attr('d', d => createLink(d, d.parent));
+        .attr('d', d => createLink(d.target, d.source));
 
       linkSelection.exit().remove();
 
@@ -178,6 +186,8 @@ const TreeVisualization = ({ treeData }) => {
       allNodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
     }
 
+    updateRef.current = update;
+
     // Handle click
     function click(event, d) {
       if (d.children) {
@@ -194,12 +204,15 @@ const TreeVisualization = ({ treeData }) => {
     root.y0 = margin.top;
     update(root);
 
+    rootRef.current.expand = expand;
+    rootRef.current.collapse = collapse;
+
   }, [treeData]);
 
   const toggleExpandCollapse = () => {
     if (!rootRef.current || !updateRef.current) return;
     const root = rootRef.current;
-    
+
     if (isExpanded) {
       if (root.children) {
         root.children.forEach(child => {
@@ -209,7 +222,7 @@ const TreeVisualization = ({ treeData }) => {
     } else {
       root.expand(root);
     }
-    
+
     updateRef.current(root);
     setIsExpanded(!isExpanded);
   };
@@ -218,6 +231,9 @@ const TreeVisualization = ({ treeData }) => {
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
       <h2>Tree Visualization</h2>
+      <button onClick={toggleExpandCollapse}>
+        {isExpanded ? "Collapse All" : "Expand All"}
+      </button>
       <p style={{ fontSize: "14px", color: "#666" }}>
         Click nodes to expand/collapse
       </p>
