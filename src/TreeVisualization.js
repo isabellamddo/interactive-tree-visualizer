@@ -222,6 +222,13 @@ const TreeVisualization = ({ treeData }) => {
     root.y0 = margin.top;
     update(root);
 
+    const initialScale = 0.3;
+    const initialTranslateX = containerWidth / 2 - (width / 2) * initialScale;
+    const initialTranslateY = 50;
+    svg.call(zoom.transform, d3.zoomIdentity
+      .translate(initialTranslateX, initialTranslateY)
+      .scale(initialScale));
+
     rootRef.current.expand = expand;
     rootRef.current.collapse = collapse;
 
