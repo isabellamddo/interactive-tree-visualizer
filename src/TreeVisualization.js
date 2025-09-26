@@ -27,7 +27,20 @@ const TreeVisualization = ({ treeData }) => {
 
   function getNodeColor(node) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-    return colors[node.depth % colors.length];
+    const baseColor = colors[node.depth % colors.length];
+
+    // Collapsed nodes darker
+    if (node._children) {
+      return d3.color(baseColor).darker(0.3);
+    }
+    // Expanded nodes normal color
+    else if (node.children) {
+      return baseColor;
+    }
+    // Leaf nodes lighter
+    else {
+      return d3.color(baseColor).brighter(0.3);
+    }
   }
 
   function positionNode(node) {
@@ -125,7 +138,7 @@ const TreeVisualization = ({ treeData }) => {
         .data(allLinks, d => d.id || (d.id = ++i));
 
       linkSelection.enter()
-        .append('path')
+        .insert('path', 'g')
         .attr('class', 'link')
         .style('fill', 'none')
         .style('stroke', '#999')
@@ -180,6 +193,11 @@ const TreeVisualization = ({ treeData }) => {
       nodeSelection.merge(nodeEnter)
         .transition().duration(500)
         .attr('transform', positionNode);
+
+      // changes color if expanded/collapsed
+      nodeSelection.merge(nodeEnter)
+        .select('rect')
+        .style('fill', d => getNodeColor(d));
 
       nodeSelection.exit().remove();
 
