@@ -164,30 +164,43 @@ const TreeVisualization = ({ treeData }) => {
 
       // Text and rectangle
       nodeEnter.each(function (node) {
-        // Text
         const nodeGroup = d3.select(this).append('g').attr('class', 'text-group');
         const text = nodeGroup.append('text')
           .attr('text-anchor', 'middle')
           .style('font-family', 'Arial, sans-serif')
           .style('font-size', '11px')
-          .style('pointer-events', 'none')
           .text(getNodeName(node));
 
         const bbox = text.node().getBBox();
         const paddingX = 15;
         const paddingY = 10;
 
-        // Rectangle background for text
-        const rect = nodeGroup.append('rect')
-          .attr('x', bbox.x - paddingX)
-          .attr('y', bbox.y - paddingY)
-          .attr('width', bbox.width + paddingX * 2)
-          .attr('height', bbox.height + paddingY * 2)
-          .style('fill', getNodeColor(node))
-          .style('stroke', '#333')
-          .style('stroke-width', '1px');
+        const canExpand = node.children || node._children;
 
-        rect.lower();
+        if (canExpand) {
+          // Ellipse for expandable nodes
+          const ellipse = nodeGroup.append('ellipse')
+            .attr('cx', 0)
+            .attr('cy', 0)
+            .attr('rx', (bbox.width + paddingX * 2) / 2)
+            .attr('ry', (bbox.height + paddingY * 2) / 2)
+            .style('fill', getNodeColor(node))
+            .style('stroke', '#333')
+            .style('stroke-width', '1.5px');
+
+          ellipse.lower();
+        } else { // Rectangle for non expandable nodes
+          const rect = nodeGroup.append('rect')
+            .attr('x', bbox.x - paddingX)
+            .attr('y', bbox.y - paddingY)
+            .attr('width', bbox.width + paddingX * 2)
+            .attr('height', bbox.height + paddingY * 2)
+            .style('fill', getNodeColor(node))
+            .style('stroke', '#333')
+            .style('stroke-width', '1px');
+
+          rect.lower();
+        }
       });
 
       nodeSelection.merge(nodeEnter)
