@@ -271,6 +271,23 @@ const TreeVisualization = ({ treeData }) => {
       fontSize: '14px'
     }}>
       <div>
+        <strong>Node Shapes:</strong>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="30" height="20">
+              <ellipse cx="15" cy="10" rx="14" ry="9" fill="#87ceeb" stroke="#333" strokeWidth="1" />
+            </svg>
+            <span>Can expand/collapse</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="30" height="20">
+              <rect x="2" y="2" width="26" height="16" fill="#87ceeb" stroke="#333" strokeWidth="1" />
+            </svg>
+            <span>Leaf node (no children)</span>
+          </div>
+        </div>
+      </div>
+      <div>
         <strong>Colors by Level:</strong>
         <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
           {legendColors.slice(0, maxDepth + 1).map((color, index) => (
