@@ -27,20 +27,7 @@ const TreeVisualization = ({ treeData }) => {
 
   function getNodeColor(node) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-    const baseColor = colors[node.depth % colors.length];
-
-    // Collapsed nodes darker
-    if (node._children) {
-      return d3.color(baseColor).darker(0.3);
-    }
-    // Expanded nodes normal color
-    else if (node.children) {
-      return baseColor;
-    }
-    // Leaf nodes lighter
-    else {
-      return d3.color(baseColor).brighter(0.3);
-    }
+    return colors[node.depth % colors.length];
   }
 
   function positionNode(node) {
@@ -167,6 +154,7 @@ const TreeVisualization = ({ treeData }) => {
         const nodeGroup = d3.select(this).append('g').attr('class', 'text-group');
         const text = nodeGroup.append('text')
           .attr('text-anchor', 'middle')
+          .attr('dy', '0.35em')
           .style('font-family', 'Arial, sans-serif')
           .style('font-size', '11px')
           .text(getNodeName(node));
@@ -206,11 +194,6 @@ const TreeVisualization = ({ treeData }) => {
       nodeSelection.merge(nodeEnter)
         .transition().duration(500)
         .attr('transform', positionNode);
-
-      // changes color if expanded/collapsed
-      nodeSelection.merge(nodeEnter)
-        .select('rect')
-        .style('fill', d => getNodeColor(d));
 
       nodeSelection.exit().remove();
 
@@ -265,6 +248,40 @@ const TreeVisualization = ({ treeData }) => {
     setIsExpanded(!isExpanded);
   };
 
+  // Legend data
+  const legendColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+
+  const Legend = () => (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '40px',
+      marginTop: '20px',
+      padding: '15px',
+      backgroundColor: '#f5f5f5',
+      borderRadius: '8px',
+      fontSize: '14px'
+    }}>
+      <div>
+        <strong>Colors by Level:</strong>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
+          {legendColors.map((color, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                backgroundColor: color,
+                border: '1px solid #333',
+                borderRadius: '3px'
+              }}></div>
+              <span>Level {index}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   // React render
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
@@ -272,6 +289,7 @@ const TreeVisualization = ({ treeData }) => {
       <button onClick={toggleExpandCollapse}>
         {isExpanded ? "Collapse All" : "Expand All"}
       </button>
+      <Legend />
       <p style={{ fontSize: "14px", color: "#666" }}>
         Click nodes to expand/collapse
       </p>
