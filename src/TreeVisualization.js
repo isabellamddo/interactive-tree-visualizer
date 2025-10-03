@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 const TreeVisualization = ({ treeData }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const updateRef = useRef(null);
+  const [maxDepth, setMaxDepth] = useState(0);
 
   // Helper functions
   function getChildren(nodeData) {
@@ -100,6 +101,13 @@ const TreeVisualization = ({ treeData }) => {
       const treeWithPositions = treemap(root);
       const allNodes = treeWithPositions.descendants();
       const allLinks = treeWithPositions.links();
+      let currentMaxDepth = 0;
+      for (const node of allNodes) {
+        if (node.depth > currentMaxDepth) {
+          currentMaxDepth = node.depth;
+        }
+      }
+      setMaxDepth(currentMaxDepth);
 
       // Descendants orders nodes
       for (const node of allNodes) {
@@ -258,14 +266,14 @@ const TreeVisualization = ({ treeData }) => {
       gap: '40px',
       marginTop: '20px',
       padding: '15px',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#edededff',
       borderRadius: '8px',
       fontSize: '14px'
     }}>
       <div>
         <strong>Colors by Level:</strong>
         <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-          {legendColors.map((color, index) => (
+          {legendColors.slice(0, maxDepth + 1).map((color, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{
                 width: '20px',
