@@ -7,6 +7,7 @@ const TreeVisualization = ({ treeData }) => {
   const [isExpanded, setIsExpanded] = useState(false); // For entire diagram
   const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
   const updateRef = useRef(null); // Update function can be called externally
+  const [sideBarOpen, setSidebarOpen] = useState(true);
   // References
   const svgRef = useRef();
   const rootRef = useRef(null); // D3 hierarchy root
@@ -58,14 +59,37 @@ const TreeVisualization = ({ treeData }) => {
       d.children.forEach(expand);
     }
   }
+  // Depth of the tree including collapsed nodes
+  function getFullDepth(node) {
+    if (!node.children && !node._children) return 0;
+    const children = node.children || node._children || [];
+    let maxChildDepth = 0;
+    for (let i = 0; i < children.length; i++) {
+      const childDepth = getFullDepth(children[i]);
+      if (childDepth > maxChildDepth) maxChildDepth = childDepth;
+    }
+    return maxChildDepth + 1;
+  }
+
 
   ////////////////////
   // Tree Rendering //
   ////////////////////
 
+  let fullDepth = 0;
+  if (treeData !== null) {
+    fullDepth = getFullDepth(treeData);
+  }
+
+
   useEffect(() => {
     if (!treeData) return;
     let nodeIDCounter = 0;
+
+    // Enables use of update function
+    const root = d3.hierarchy(treeData, getChildren);
+    rootRef.current = root;
+    setMaxDepth(getFullDepth(treeData));
 
     // Container for diagram
     const svg = d3.select(svgRef.current);
@@ -95,9 +119,6 @@ const TreeVisualization = ({ treeData }) => {
     const layoutHeight = height - margin.top - margin.bottom;
     treemap.size([layoutWidth, layoutHeight]);
 
-    const root = d3.hierarchy(treeData, getChildren);
-    rootRef.current = root;
-
     // Collapse all nodes initially
     if (root.children) root.children.forEach(collapse);
 
@@ -109,15 +130,6 @@ const TreeVisualization = ({ treeData }) => {
       const treeWithPositions = treemap(root);
       const allNodes = treeWithPositions.descendants(); // Node array
       const allLinks = treeWithPositions.links(); // Link objects array
-
-
-      let currentMaxDepth = 0;
-      for (const node of allNodes) {
-        if (node.depth > currentMaxDepth) {
-          currentMaxDepth = node.depth;
-        }
-      }
-      setMaxDepth(currentMaxDepth);
 
       // NODE POSITIONING
       for (const node of allNodes) {
@@ -327,7 +339,7 @@ const TreeVisualization = ({ treeData }) => {
       <div>
         <strong>Colors by Level:</strong>
         <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-          {legendColors.slice(0, maxDepth + 1).map((color, index) => (
+          {legendColors.slice(0, maxDepth).map((color, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{
                 width: '20px',
