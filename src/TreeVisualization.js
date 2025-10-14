@@ -63,10 +63,9 @@ const TreeVisualization = ({ treeData }) => {
   // Tree Rendering //
   ////////////////////
 
-  // Tree structure
   useEffect(() => {
     if (!treeData) return;
-    let i = 0;
+    let nodeIDCounter = 0;
 
     // Container for diagram
     const svg = d3.select(svgRef.current);
@@ -77,17 +76,18 @@ const TreeVisualization = ({ treeData }) => {
     const width = 4000;
     const height = 3000;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+    // Group for ALL nodes and links
+    const mainGroup = svg.append("g");
 
     svg.attr("width", containerWidth).attr("height", containerHeight);
 
+    // Zoom and pan
     const zoom = d3.zoom()
-      .scaleExtent([0.05, 5])
+      .scaleExtent([0.05, 5]) // 5-500% zoom
       .on("zoom", (event) => {
         mainGroup.attr("transform", event.transform);
       });
     svg.call(zoom);
-
-    const mainGroup = svg.append("g");
 
     // Tree layout
     const treemap = d3.tree();
@@ -101,10 +101,16 @@ const TreeVisualization = ({ treeData }) => {
     // Collapse all nodes initially
     if (root.children) root.children.forEach(collapse);
 
+    /////////////////////
+    // Update Function //
+    /////////////////////
+
     function update(source) {
       const treeWithPositions = treemap(root);
-      const allNodes = treeWithPositions.descendants();
-      const allLinks = treeWithPositions.links();
+      const allNodes = treeWithPositions.descendants(); // Node array
+      const allLinks = treeWithPositions.links(); // Link objects array
+
+
       let currentMaxDepth = 0;
       for (const node of allNodes) {
         if (node.depth > currentMaxDepth) {
@@ -113,9 +119,9 @@ const TreeVisualization = ({ treeData }) => {
       }
       setMaxDepth(currentMaxDepth);
 
-      // Descendants orders nodes
+      // NODE POSITIONING
       for (const node of allNodes) {
-        node.y = node.depth * 150 + margin.top;
+        node.y = node.depth * 150 + margin.top; // Vretical spacing based on depth
         node.x = node.x + margin.left;
       }
 
@@ -125,14 +131,8 @@ const TreeVisualization = ({ treeData }) => {
         if (!nodesByLevel[node.depth]) nodesByLevel[node.depth] = [];
         nodesByLevel[node.depth].push(node);
       }
-      Object.keys(nodesByLevel).forEach(level => {
-        const levelNodes = nodesByLevel[level];
-        levelNodes.forEach((node, index) => {
-          node.y += (index % 3) * 15 - 15;
-        });
-      });
 
-      // LINKS
+      // LINK ANIMATIONS
       const linkSelection = mainGroup.selectAll('path.link')
         .data(allLinks, d => `${d.source.data.name}-${d.target.data.name}`);
 
@@ -155,10 +155,7 @@ const TreeVisualization = ({ treeData }) => {
       linkUpdate.transition()
         .duration(500)
         .attr('d', d => {
-          return `M${d.source.x},${d.source.y}
-            C${d.source.x},${(d.source.y + d.target.y) / 2}
-             ${d.target.x},${(d.source.y + d.target.y) / 2}
-             ${d.target.x},${d.target.y}`;
+          return `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`;
         });
 
       // Remove exiting links
@@ -171,10 +168,11 @@ const TreeVisualization = ({ treeData }) => {
         .style('opacity', 0)
         .remove();
 
-      // NODES
+      // NODE ANIMATIONS
       const nodeSelection = mainGroup.selectAll('g.node')
-        .data(allNodes, d => d.id || (d.id = ++i));
+        .data(allNodes, d => d.id || (d.id = ++nodeIDCounter));
 
+      //  Enter new links at parent's previous position
       const nodeEnter = nodeSelection.enter()
         .append('g')
         .attr('class', 'node')
@@ -192,6 +190,7 @@ const TreeVisualization = ({ treeData }) => {
           .style('font-size', '11px')
           .text(getNodeName(node));
 
+        // Measure text size to fit in shape
         const bbox = text.node().getBBox();
         const paddingX = 15;
         const paddingY = 10;
@@ -209,7 +208,7 @@ const TreeVisualization = ({ treeData }) => {
             .style('stroke', '#333')
             .style('stroke-width', '1.5px');
 
-          ellipse.lower();
+          ellipse.lower(); // Set behinf text
         } else { // Rectangle for non expandable nodes
           const rect = nodeGroup.append('rect')
             .attr('x', bbox.x - paddingX)
@@ -224,20 +223,11 @@ const TreeVisualization = ({ treeData }) => {
         }
       });
 
-      // Update existing nodes with transition
+      // Update existing node positions with transition
       const nodeUpdate = nodeEnter.merge(nodeSelection);
-
       nodeUpdate.transition()
         .duration(500)
         .attr('transform', d => `translate(${d.x},${d.y})`);
-
-      nodeUpdate.select('.text-group rect, .text-group ellipse')
-        .transition()
-        .duration(500)
-        .style('fill', d => getNodeColor(d));
-
-      nodeUpdate.select('text')
-        .style('fill', d => d._children || d.children ? 'white' : 'black');
 
       // Remove exiting nodes
       const nodeExit = nodeSelection.exit().transition()
@@ -248,6 +238,7 @@ const TreeVisualization = ({ treeData }) => {
       nodeExit.select('.text-group rect, .text-group ellipse').style('opacity', 0);
       nodeExit.select('text').style('fill-opacity', 0);
 
+      // Save positions for next update
       allNodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
     }
 
@@ -265,6 +256,7 @@ const TreeVisualization = ({ treeData }) => {
       update(d);
     }
 
+    // Initialize tree and zoom scale
     root.x0 = width / 2;
     root.y0 = margin.top;
     update(root);
@@ -276,10 +268,12 @@ const TreeVisualization = ({ treeData }) => {
       .translate(initialTranslateX, initialTranslateY)
       .scale(initialScale));
 
+    // Attach helpers for button
     rootRef.current.expand = expand;
     rootRef.current.collapse = collapse;
 
   }, [treeData]);
+
 
   const toggleExpandCollapse = () => {
     if (!rootRef.current || !updateRef.current) return;
