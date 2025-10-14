@@ -11,6 +11,7 @@ function App() {
   const [file, setFile] = useState();
   const [treeData, setTreeData] = useState(null);
   const [error, setError] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Default sidebar is open 
 
   const fileReader = new FileReader();
 
@@ -106,22 +107,65 @@ function App() {
     }
   };
   return (
-    // Form for csv upload
-    <div style={{ textAlign: "center" }}>
-      <h1>Upload CSV</h1>
-      <form>
-        <input type={"file"} id={"csvFileInput"} accept={'.csv'} onChange={handleOnChange} />
-        <button onClick={(e) => { handleOnSubmit(e) }}>Upload</button>
-      </form>
-
-      {error && (
-        <div style={{ color: 'red', margin: '10px' }}>
-          {error}
+    <div style={{
+      display: 'flex',
+      height: '100vh',
+      overflow: 'hidden',
+    }}>
+      <button
+        style={{
+          position: 'fixed',
+          left: sidebarOpen ? '320px' : '0',
+          top: '20px',
+          backgroundColor: '#34495e',
+          color: 'white',
+          fontWeight: 'bold',
+          padding: '10px 15px',
+          transition: 'left 0.3s ease',
+          zIndex: 1000,
+        }}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        {sidebarOpen ? '\u2716':'\u2261'}
+      </button>
+      <div style={{
+        width: sidebarOpen ? '320px' : '0',
+        backgroundColor: '#2c3e50',
+        color: 'white',
+        padding: sidebarOpen ? '20px' : '0',
+        transition: '0.3s ease',
+      }}>
+        <div style={{
+          opacity: sidebarOpen ? 1 : 0,
+          transition: '0.3s ease'
+        }}>
+          <h1>Sidebar</h1>
+          <p>test</p>
         </div>
-      )}
-      {treeData && <TreeVisualization treeData={treeData} />}
-    </div>
+      </div>
+      {/* Form for csv upload */}
+      <div style={{
+        flex: 1,
+        backgroundColor: '#ecf0f1',
+        overflow: 'auto',
+        padding: '20px'
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <h1>Upload CSV</h1>
+          <form>
+            <input type={"file"} id={"csvFileInput"} accept={'.csv'} onChange={handleOnChange} />
+            <button onClick={(e) => { handleOnSubmit(e) }}>Upload</button>
+          </form>
 
+          {error && (
+            <div style={{ color: 'red', margin: '10px' }}>
+              {error}
+            </div>
+          )}
+          {treeData && <TreeVisualization treeData={treeData} />}
+        </div>
+      </div>
+    </div>
   );
 }
 
