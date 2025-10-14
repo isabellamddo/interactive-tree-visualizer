@@ -2,11 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 const TreeVisualization = ({ treeData }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const updateRef = useRef(null);
-  const [maxDepth, setMaxDepth] = useState(0);
 
-  // Helper functions
+
+  const [isExpanded, setIsExpanded] = useState(false); // For entire diagram
+  const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
+  const updateRef = useRef(null); // Update function can be called externally
+  // References
+  const svgRef = useRef();
+  const rootRef = useRef(null); // D3 hierarchy root
+
+  //////////////////////
+  // Helper functions //
+  //////////////////////
+
+  // Array of children
   function getChildren(nodeData) {
     return nodeData.children;
   }
@@ -15,6 +24,7 @@ const TreeVisualization = ({ treeData }) => {
     return node.data.name;
   }
 
+  // Svg path between child and parent
   function createLink(childNode, parentNode) {
     const childX = childNode.x;
     const childY = childNode.y;
@@ -29,10 +39,6 @@ const TreeVisualization = ({ treeData }) => {
   function getNodeColor(node) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
     return colors[node.depth % colors.length];
-  }
-
-  function positionNode(node) {
-    return `translate(${node.x},${node.y})`;
   }
 
   function collapse(d) {
@@ -53,11 +59,9 @@ const TreeVisualization = ({ treeData }) => {
     }
   }
 
-  // End helper functions
-
-  // React refs
-  const svgRef = useRef();
-  const rootRef = useRef(null);
+  ////////////////////
+  // Tree Rendering //
+  ////////////////////
 
   // Tree structure
   useEffect(() => {
@@ -130,26 +134,41 @@ const TreeVisualization = ({ treeData }) => {
 
       // LINKS
       const linkSelection = mainGroup.selectAll('path.link')
-        .data(allLinks, d => d.id || (d.id = ++i));
+        .data(allLinks, d => `${d.source.data.name}-${d.target.data.name}`);
 
-      linkSelection.enter()
+      // Enter new links at parent's previous position
+      const linkEnter = linkSelection.enter()
         .insert('path', 'g')
         .attr('class', 'link')
+        .style('fill', 'none')
         .style('stroke', '#999')
         .style('stroke-width', '1.5px')
-        .attr('d', d => createLink(d.target, d.source));
+        .style('opacity', 0.6)
+        .attr('d', d => {
+          const o = { x: source.x0 || source.x, y: source.y0 || source.y };
+          return `M${o.x},${o.y}L${o.x},${o.y}`;
+        });
 
-      linkSelection
-        .attr('d', d => createLink(d.target, d.source));
+      // Update existing links
+      const linkUpdate = linkEnter.merge(linkSelection);
 
-      // Collapse animate
-      linkSelection.exit()
-        .transition()
+      linkUpdate.transition()
+        .duration(500)
+        .attr('d', d => {
+          return `M${d.source.x},${d.source.y}
+            C${d.source.x},${(d.source.y + d.target.y) / 2}
+             ${d.target.x},${(d.source.y + d.target.y) / 2}
+             ${d.target.x},${d.target.y}`;
+        });
+
+      // Remove exiting links
+      linkSelection.exit().transition()
         .duration(500)
         .attr('d', d => {
           const o = { x: source.x, y: source.y };
-          return `M${o.x},${o.y} L${o.x},${o.y}`;
+          return `M${o.x},${o.y}L${o.x},${o.y}`;
         })
+        .style('opacity', 0)
         .remove();
 
       // NODES
