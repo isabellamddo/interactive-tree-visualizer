@@ -132,16 +132,17 @@ const TreeVisualization = ({ treeData }) => {
       const linkSelection = mainGroup.selectAll('path.link')
         .data(allLinks, d => d.id || (d.id = ++i));
 
-      //Expand animation
       linkSelection.enter()
         .insert('path', 'g')
         .attr('class', 'link')
-        .style('fill', 'none')
         .style('stroke', '#999')
         .style('stroke-width', '1.5px')
         .attr('d', d => createLink(d.target, d.source));
 
-      // Collapse animation
+      linkSelection
+        .attr('d', d => createLink(d.target, d.source));
+
+      // Collapse animate
       linkSelection.exit()
         .transition()
         .duration(500)
@@ -204,15 +205,29 @@ const TreeVisualization = ({ treeData }) => {
         }
       });
 
-      nodeSelection.merge(nodeEnter)
-        .transition().duration(500)
-        .attr('transform', positionNode);
+      // Update existing nodes with transition
+      const nodeUpdate = nodeEnter.merge(nodeSelection);
 
-      nodeSelection.exit()
+      nodeUpdate.transition()
+        .duration(500)
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+
+      nodeUpdate.select('.text-group rect, .text-group ellipse')
         .transition()
+        .duration(500)
+        .style('fill', d => getNodeColor(d));
+
+      nodeUpdate.select('text')
+        .style('fill', d => d._children || d.children ? 'white' : 'black');
+
+      // Remove exiting nodes
+      const nodeExit = nodeSelection.exit().transition()
         .duration(500)
         .attr('transform', d => `translate(${source.x},${source.y})`)
         .remove();
+
+      nodeExit.select('.text-group rect, .text-group ellipse').style('opacity', 0);
+      nodeExit.select('text').style('fill-opacity', 0);
 
       allNodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
     }
