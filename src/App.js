@@ -126,7 +126,7 @@ function App() {
         }}
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? '\u2716':'\u2261'}
+        {sidebarOpen ? '\u2716' : '\u2261'}
       </button>
       <div style={{
         width: sidebarOpen ? '320px' : '0',
@@ -139,8 +139,39 @@ function App() {
           opacity: sidebarOpen ? 1 : 0,
           transition: '0.3s ease'
         }}>
-          <h1>Sidebar</h1>
-          <p>test</p>
+          <h1>Upload CSV</h1>
+          <form>
+            <label
+              htmlFor="csvFileInput"
+              style={{
+                padding: '15px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                border: '2px solid #3498db',
+                textAlign: 'center',
+                display: 'block',
+                marginBottom: '15px'
+              }}
+            >
+              <div style={{ fontSize: '40px', marginBottom: '10px' }}>{`\u{1F4C1}`}</div>
+              <div style={{}}>
+                {file ? file.name : 'Click to select CSV file'}
+              </div>
+            </label>
+            <input
+              id="csvFileInput"
+              accept=".csv"
+              onChange={handleOnChange}
+              style={{ display: 'none' }}
+            />
+            <button onClick={(e) => { handleOnSubmit(e) }}>Upload</button>
+          </form>
+
+          {error && (
+            <div style={{ color: 'red', margin: '10px' }}>
+              {error}
+            </div>
+          )}
         </div>
       </div>
       {/* Form for csv upload */}
@@ -151,17 +182,7 @@ function App() {
         padding: '20px'
       }}>
         <div style={{ textAlign: "center" }}>
-          <h1>Upload CSV</h1>
-          <form>
-            <input type={"file"} id={"csvFileInput"} accept={'.csv'} onChange={handleOnChange} />
-            <button onClick={(e) => { handleOnSubmit(e) }}>Upload</button>
-          </form>
 
-          {error && (
-            <div style={{ color: 'red', margin: '10px' }}>
-              {error}
-            </div>
-          )}
           {treeData && <TreeVisualization treeData={treeData} />}
         </div>
       </div>
