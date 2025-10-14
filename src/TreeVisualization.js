@@ -132,19 +132,24 @@ const TreeVisualization = ({ treeData }) => {
       const linkSelection = mainGroup.selectAll('path.link')
         .data(allLinks, d => d.id || (d.id = ++i));
 
+      //Expand animation
       linkSelection.enter()
         .insert('path', 'g')
         .attr('class', 'link')
         .style('fill', 'none')
         .style('stroke', '#999')
         .style('stroke-width', '1.5px')
-        .style('opacity', 0.6)
         .attr('d', d => createLink(d.target, d.source));
 
-      linkSelection
-        .attr('d', d => createLink(d.target, d.source));
-
-      linkSelection.exit().remove();
+      // Collapse animation
+      linkSelection.exit()
+        .transition()
+        .duration(500)
+        .attr('d', d => {
+          const o = { x: source.x, y: source.y };
+          return `M${o.x},${o.y} L${o.x},${o.y}`;
+        })
+        .remove();
 
       // NODES
       const nodeSelection = mainGroup.selectAll('g.node')
@@ -203,7 +208,11 @@ const TreeVisualization = ({ treeData }) => {
         .transition().duration(500)
         .attr('transform', positionNode);
 
-      nodeSelection.exit().remove();
+      nodeSelection.exit()
+        .transition()
+        .duration(500)
+        .attr('transform', d => `translate(${source.x},${source.y})`)
+        .remove();
 
       allNodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
     }
