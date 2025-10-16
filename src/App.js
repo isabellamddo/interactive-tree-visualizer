@@ -12,6 +12,7 @@ function App() {
   const [treeData, setTreeData] = useState(null);
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true); // Default sidebar is open 
+  const [uploadAttempted, setUploadAttempted] = useState(false);
 
   const fileReader = new FileReader();
 
@@ -46,6 +47,7 @@ function App() {
   // User uploaded file
   const handleOnSubmit = (e) => {
     e.preventDefault();
+    setUploadAttempted(true);
 
     if (file) {
       fileReader.onload = function (event) {
@@ -159,17 +161,61 @@ function App() {
               </div>
             </label>
             <input
+              type="file"
               id="csvFileInput"
               accept=".csv"
               onChange={handleOnChange}
               style={{ display: 'none' }}
             />
-            <button onClick={(e) => { handleOnSubmit(e) }}>Upload</button>
+            <button
+              onClick={(e) => { handleOnSubmit(e) }}
+              style={{
+                backgroundColor: '#3498db',
+                color: 'white',
+                border: 'none',
+                padding: '12px 20px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                width: '100%'
+              }}
+            >
+              Upload & Visualize
+            </button>
           </form>
 
           {error && (
             <div style={{ color: 'red', margin: '10px' }}>
               {error}
+            </div>
+          )}
+
+          {!file && uploadAttempted && (
+            <div style={{
+              backgroundColor: '#eb503eff',
+              color: 'white',
+              padding: '12px',
+              borderRadius: '5px',
+              marginTop: '10px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              Must select a CSV file to upload!
+            </div>
+          )}
+
+          {treeData && !error && (
+            <div style={{
+              backgroundColor: '#27ae60',
+              color: 'white',
+              padding: '12px',
+              borderRadius: '5px',
+              marginTop: '10px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              Tree successfully generated!
             </div>
           )}
         </div>
