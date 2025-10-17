@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import TreeVisualization from './TreeVisualization';
 import './App.css';
 import * as d3 from 'd3';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 
 function App() {
@@ -13,6 +13,27 @@ function App() {
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true); // Default sidebar is open 
   const [uploadAttempted, setUploadAttempted] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    if (uploadAttempted && !file) {
+      // Start fade out after 2 seconds
+      const fadeTimer = setTimeout(() => {
+        setFadeOut(true);
+      }, 2000);
+
+      // Remove completely after 4 seconds
+      const removeTimer = setTimeout(() => {
+        setUploadAttempted(false);
+        setFadeOut(false);
+      }, 4000);
+
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(removeTimer);
+      };
+    }
+  }, [uploadAttempted, file]);
 
   const fileReader = new FileReader();
 
@@ -193,13 +214,16 @@ function App() {
 
           {!file && uploadAttempted && (
             <div style={{
-              backgroundColor: '#eb503eff',
+              backgroundColor: '#eb4f3e95',
               color: 'white',
-              padding: '12px',
+              padding: '8px',
               borderRadius: '5px',
               marginTop: '10px',
               fontSize: '14px',
-              textAlign: 'center'
+              textAlign: 'center',
+              border: '1px solid #eb4f3eff',
+              opacity: fadeOut ? 0 : 1,
+              transition: 'opacity 1s ease'
             }}>
               Must select a CSV file to upload!
             </div>
@@ -207,13 +231,14 @@ function App() {
 
           {treeData && !error && (
             <div style={{
-              backgroundColor: '#27ae60',
+              backgroundColor: '#27ae5f9f',
               color: 'white',
-              padding: '12px',
+              padding: '8px',
               borderRadius: '5px',
               marginTop: '10px',
               fontSize: '14px',
-              textAlign: 'center'
+              textAlign: 'center',
+              border: '1px solid #27ae5eff'
             }}>
               Tree successfully generated!
             </div>
