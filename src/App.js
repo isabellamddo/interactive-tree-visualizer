@@ -243,6 +243,28 @@ function App() {
               Tree successfully generated!
             </div>
           )}
+
+          <div style={{
+            marginTop: '20px',
+            padding: '15px',
+            backgroundColor: '#34495e',
+            borderRadius: '5px',
+            fontSize: '13px',
+            lineHeight: '1.6'
+          }}>
+            <strong>CSV Format:</strong>
+            <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
+              <li>Must have 2 columns</li>
+              <li>First row should be headers: owner, name</li>
+              <li>Each row represents a parent-child relationship</li>
+            </ul>
+            <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
+              Example:<br />
+              owner,name<br />
+              root,child1<br />
+              root,child2
+            </div>
+          </div>
         </div>
       </div>
       {/* Form for csv upload */}
@@ -254,7 +276,26 @@ function App() {
       }}>
         <div style={{ textAlign: "center" }}>
 
-          {treeData && <TreeVisualization treeData={treeData} />}
+          {treeData ? (
+            <TreeVisualization treeData={treeData} />
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              color: '#7f8c8d',
+              textAlign: 'center',
+              gap: '20px'
+            }}>
+              <div style={{ fontSize: '80px' }}>{`\u{1F332}`}</div>
+              <h2 style={{ fontSize: '48px', margin: '0' }}>Interactive Tree Visualizer</h2>
+              <p style={{ fontSize: '18px', margin: '0' }}>
+                Upload a CSV file and click "Upload & Visualize" to get started
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

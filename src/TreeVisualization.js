@@ -313,9 +313,7 @@ const TreeVisualization = ({ treeData }) => {
       display: 'flex',
       justifyContent: 'center',
       gap: '40px',
-      marginTop: '20px',
       padding: '15px',
-      backgroundColor: '#edededff',
       borderRadius: '8px',
       fontSize: '14px'
     }}>
@@ -358,15 +356,40 @@ const TreeVisualization = ({ treeData }) => {
 
   // React render
   return (
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <h2>Tree Visualization</h2>
-      <button onClick={toggleExpandCollapse}>
-        {isExpanded ? "Collapse All" : "Expand All"}
-      </button>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ marginBottom: "10px" }}>
+        <div style={{ fontSize: '60px', marginBottom: '4px' }}>{`\u{1F332}`}</div>
+        <h2 style={{ fontSize: '36px', margin: '0', color: '#2c3e50' }}>Interactive Tree Visualizer</h2>
+      </div>
+
       <Legend />
-      <p style={{ fontSize: "14px", color: "#666" }}>
-        Click nodes to expand/collapse
-      </p>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '10px',
+        gap: '15px'
+      }}>
+        <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+          Click nodes to expand/collapse
+        </p>
+        <button
+          onClick={toggleExpandCollapse}
+          style={{
+            backgroundColor: '#3498db',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            marginBottom: '5px'
+          }}
+        >
+          {isExpanded ? "Collapse All" : "Expand All"}
+        </button>
+      </div>
       <div style={{ border: "2px solid #ccc", borderRadius: "8px", overflow: "hidden", background: "#fafafa" }}>
         <svg ref={svgRef}></svg>
       </div>
