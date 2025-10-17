@@ -138,9 +138,11 @@ function App() {
       <button
         style={{
           position: 'fixed',
-          left: sidebarOpen ? '320px' : '0',
+          left: sidebarOpen ? '295px' : '0',
           top: '20px',
-          backgroundColor: '#34495e',
+          backgroundColor: '#3498db',
+          border: '2px solid #ffffffff',
+          borderRadius: '2px',
           color: 'white',
           fontWeight: 'bold',
           padding: '10px 15px',
