@@ -72,6 +72,18 @@ const TreeVisualization = ({ treeData }) => {
     return maxChildDepth + 1;
   }
 
+  // Go from child to root
+  function getTrailToNode(node) {
+    const trail = [];
+    let current = node;
+
+    while (current) {
+      trail.push(current.data.name);
+      current = current.parent;
+    }
+    return trail;
+  }
+
 
   ////////////////////
   // Tree Rendering //
@@ -191,7 +203,13 @@ const TreeVisualization = ({ treeData }) => {
         .attr('class', 'node')
         .attr('transform', d => `translate(${source.x0 || width / 2},${source.y0 || margin.top})`)
         .style('cursor', 'pointer')
-        .on('click', click);
+        .on('click', click)
+        .on('mouseenter', function (event, d) {
+          setBreadcrumb(getTrailToNode(d));
+        })
+        .on('mouseleave', function () {
+          setBreadcrumb([]);
+        });
 
       // Text and rectangle
       nodeEnter.each(function (node) {
@@ -374,7 +392,7 @@ const TreeVisualization = ({ treeData }) => {
         color: breadcrumb.length > 0 ? '#2c3e50' : '#7f8c8d',
         fontStyle: breadcrumb.length > 0 ? 'normal' : 'italic'
       }}>
-        {breadcrumb.length > 0 ? breadcrumb.join(' → ') : 'Hover over a node to see the breadcrumb trail'}
+        {breadcrumb.length > 0 ? breadcrumb.join(' \u2192 ') : 'Hover over a node to see the breadcrumb trail'}
       </div>
       <div style={{
         display: 'flex',
