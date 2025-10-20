@@ -7,11 +7,11 @@ const TreeVisualization = ({ treeData }) => {
   const [isExpanded, setIsExpanded] = useState(false); // For entire diagram
   const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
   const updateRef = useRef(null); // Update function can be called externally
-  const [sideBarOpen, setSidebarOpen] = useState(true);
   const [breadcrumb, setBreadcrumb] = useState([]);
   // References
   const svgRef = useRef();
   const rootRef = useRef(null); // D3 hierarchy root
+  const mainGroupRef = useRef(null);
 
   //////////////////////
   // Helper functions //
@@ -26,17 +26,17 @@ const TreeVisualization = ({ treeData }) => {
     return node.data.name;
   }
 
-  // Svg path between child and parent
-  function createLink(childNode, parentNode) {
-    const childX = childNode.x;
-    const childY = childNode.y;
-    const parentX = parentNode.x;
-    const parentY = parentNode.y;
+  // // Svg path between child and parent
+  // function createLink(childNode, parentNode) {
+  //   const childX = childNode.x;
+  //   const childY = childNode.y;
+  //   const parentX = parentNode.x;
+  //   const parentY = parentNode.y;
 
-    // M: move to
-    // L: draw line to
-    return `M${childX},${childY} L${parentX},${parentY}`;
-  }
+  //   // M: move to
+  //   // L: draw line to
+  //   return `M${childX},${childY} L${parentX},${parentY}`;
+  // }
 
   function getNodeColor(node) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
@@ -60,6 +60,7 @@ const TreeVisualization = ({ treeData }) => {
       d.children.forEach(expand);
     }
   }
+
   // Depth of the tree including collapsed nodes
   function getFullDepth(node) {
     if (!node.children && !node._children) return 0;
@@ -81,7 +82,7 @@ const TreeVisualization = ({ treeData }) => {
       trail.push(current.data.name);
       current = current.parent;
     }
-    return trail;
+    return trail.reverse();
   }
 
 
@@ -89,10 +90,10 @@ const TreeVisualization = ({ treeData }) => {
   // Tree Rendering //
   ////////////////////
 
-  let fullDepth = 0;
-  if (treeData !== null) {
-    fullDepth = getFullDepth(treeData);
-  }
+  // let fullDepth = 0;
+  // if (treeData !== null) {
+  //   fullDepth = getFullDepth(treeData);
+  // }
 
 
   useEffect(() => {
@@ -115,6 +116,7 @@ const TreeVisualization = ({ treeData }) => {
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
     // Group for ALL nodes and links
     const mainGroup = svg.append("g");
+    mainGroupRef.current = mainGroup;
 
     svg.attr("width", containerWidth).attr("height", containerHeight);
 
