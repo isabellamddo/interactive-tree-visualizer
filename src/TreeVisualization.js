@@ -8,6 +8,7 @@ const TreeVisualization = ({ treeData }) => {
   const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
   const updateRef = useRef(null); // Update function can be called externally
   const [sideBarOpen, setSidebarOpen] = useState(true);
+  const [breadcrumb, setBreadcrumb] = useState([]);
   // References
   const svgRef = useRef();
   const rootRef = useRef(null); // D3 hierarchy root
@@ -363,6 +364,18 @@ const TreeVisualization = ({ treeData }) => {
       </div>
 
       <Legend />
+      <div style={{
+        padding: '10px',
+        backgroundColor: '#ecf0f1',
+        borderRadius: '5px',
+        marginBottom: '10px',
+        fontSize: '14px',
+        fontWeight: '500',
+        color: breadcrumb.length > 0 ? '#2c3e50' : '#7f8c8d',
+        fontStyle: breadcrumb.length > 0 ? 'normal' : 'italic'
+      }}>
+        {breadcrumb.length > 0 ? breadcrumb.join(' → ') : 'Hover over a node to see the breadcrumb trail'}
+      </div>
       <div style={{
         display: 'flex',
         alignItems: 'center',
