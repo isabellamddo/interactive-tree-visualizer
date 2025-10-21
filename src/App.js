@@ -4,6 +4,9 @@ import './App.css';
 import * as d3 from 'd3';
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
+const exampleCSVs = {
+  "US Counties": "/uscounties_clean_small.csv"
+}
 
 function App() {
   console.log('D3 imported', typeof d3.select);
@@ -16,6 +19,7 @@ function App() {
   const [fadeOut, setFadeOut] = useState(false);
   const [isFileHovered, setIsFileHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [selectedExample, setSelectedExample] = useState("");
 
   useEffect(() => {
     if (uploadAttempted && !file) {
@@ -36,6 +40,64 @@ function App() {
       };
     }
   }, [uploadAttempted, file]);
+
+  // For example datasets
+  useEffect(() => {
+    if (selectedExample) {
+      fetch(exampleCSVs[selectedExample])
+        .then(response => response.text())
+        .then(csvOutput => {
+          // Same code from handleOnSubmit
+          const validation = validateHeaders(csvOutput);
+
+          if (!validation.valid) {
+            setError(validation.error);
+            return;
+          }
+
+          setError('');
+
+          const csvData = csvOutput.split('\n');
+          const csvLines = [];
+          for (const line of csvData) {
+            if (line.trim() !== '') {
+              csvLines.push(line);
+            }
+          }
+
+          const headerRow = csvLines[0];
+          const headerNames = headerRow.split(',');
+          const headers = [];
+
+          for (const header of headerNames) {
+            headers.push(header.trim());
+          }
+          const data = [];
+
+          for (let i = 1; i < csvLines.length; i++) {
+            const values = csvLines[i].split(',').map(v => v.trim());
+            data.push({
+              owner: values[headers.indexOf('owner')],
+              name: values[headers.indexOf('name')]
+            });
+          }
+
+          console.log('Owners:', [...new Set(data.map(d => d.owner))].length);
+          console.log('Names:', [...new Set(data.map(d => d.name))].length);
+
+          try {
+            const tree = buildTree(data);
+            setTreeData(tree);
+            console.log('Tree built:', tree);
+          } catch (err) {
+            setError(err.message);
+          }
+        })
+        .catch(err => {
+          setError('Could not load example');
+        });
+    }
+  }, [selectedExample]);
 
   const fileReader = new FileReader();
 
@@ -272,6 +334,31 @@ function App() {
               owner,name<br />
               root,child1<br />
               root,child2
+            </div>
+          </div>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+              Try an example:
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {Object.keys(exampleCSVs).map(name => (
+                <button
+                  key={name}
+                  onClick={() => setSelectedExample(name)}
+                  style={{
+                    backgroundColor: '#34495e',
+                    color: 'white',
+                    border: '2px solid #3498db',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
