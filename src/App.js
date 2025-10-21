@@ -14,6 +14,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true); // Default sidebar is open 
   const [uploadAttempted, setUploadAttempted] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [isFileHovered, setIsFileHovered] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   useEffect(() => {
     if (uploadAttempted && !file) {
@@ -175,8 +177,11 @@ function App() {
                 border: '2px solid #3498db',
                 textAlign: 'center',
                 display: 'block',
-                marginBottom: '15px'
+                marginBottom: '15px',
+                backgroundColor: isFileHovered ? '#34495e' : 'transparent'
               }}
+              onMouseEnter={() => setIsFileHovered(true)}
+              onMouseLeave={() => setIsFileHovered(false)}
             >
               <div style={{ fontSize: '40px', marginBottom: '10px' }}>{`\u{1F4C1}`}</div>
               <div style={{}}>
@@ -193,16 +198,18 @@ function App() {
             <button
               onClick={(e) => { handleOnSubmit(e) }}
               style={{
-                backgroundColor: '#3498db',
                 color: 'white',
-                border: 'none',
+                border: '2px solid #3498db',
                 padding: '12px 20px',
                 borderRadius: '5px',
                 cursor: 'pointer',
                 fontSize: '16px',
                 fontWeight: 'bold',
-                width: '100%'
+                width: '100%',
+                backgroundColor: isButtonHovered ? '#3498db87' : '#3498db'
               }}
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
             >
               Upload & Visualize
             </button>

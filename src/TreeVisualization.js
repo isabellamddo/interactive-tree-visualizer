@@ -26,18 +26,6 @@ const TreeVisualization = ({ treeData }) => {
     return node.data.name;
   }
 
-  // // Svg path between child and parent
-  // function createLink(childNode, parentNode) {
-  //   const childX = childNode.x;
-  //   const childY = childNode.y;
-  //   const parentX = parentNode.x;
-  //   const parentY = parentNode.y;
-
-  //   // M: move to
-  //   // L: draw line to
-  //   return `M${childX},${childY} L${parentX},${parentY}`;
-  // }
-
   function getNodeColor(node) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
     return colors[node.depth % colors.length];
@@ -85,16 +73,45 @@ const TreeVisualization = ({ treeData }) => {
     return trail.reverse();
   }
 
+  function highlightPath(node) {
+    const mainGroup = mainGroupRef.current;
+    if (!mainGroup) return;
+
+    if (!node) {
+      // Back to normal link style
+      setBreadcrumb([]);
+      mainGroup.selectAll('.link').style('stroke', '#999').style('stroke-width', '1.5px').style('opacity', 0.6);
+      return;
+    }
+
+    // Nodes from hovered to root
+    const pathNodes = [];
+    let current = node;
+    while (current) {
+      pathNodes.push(current);
+      current = current.parent;
+    }
+
+    // Update breadcrumb
+    setBreadcrumb(getTrailToNode(node));
+
+    // Back to normal link style
+    mainGroup.selectAll('.link').style('stroke', '#999').style('stroke-width', '1.5px').style('opacity', 0.6);
+
+    // Highlight links in the path
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+      mainGroup.selectAll('.link')
+        .filter(d => d.target === pathNodes[i] && d.source === pathNodes[i + 1])
+        .style('stroke', '#eb4f3eff')
+        .style('stroke-width', '3px')
+        .style('opacity', 1);
+    }
+  }
+
 
   ////////////////////
   // Tree Rendering //
   ////////////////////
-
-  // let fullDepth = 0;
-  // if (treeData !== null) {
-  //   fullDepth = getFullDepth(treeData);
-  // }
-
 
   useEffect(() => {
     if (!treeData) return;
@@ -207,10 +224,10 @@ const TreeVisualization = ({ treeData }) => {
         .style('cursor', 'pointer')
         .on('click', click)
         .on('mouseenter', function (event, d) {
-          setBreadcrumb(getTrailToNode(d));
+          highlightPath(d);
         })
         .on('mouseleave', function () {
-          setBreadcrumb([]);
+          highlightPath(null);
         });
 
       // Text and rectangle
