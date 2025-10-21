@@ -20,6 +20,7 @@ function App() {
   const [isFileHovered, setIsFileHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [selectedExample, setSelectedExample] = useState("");
+  const [successFade, setSuccessFade] = useState(false);
 
   useEffect(() => {
     if (uploadAttempted && !file) {
@@ -39,7 +40,19 @@ function App() {
         clearTimeout(removeTimer);
       };
     }
-  }, [uploadAttempted, file]);
+
+    if (treeData && !error) {
+      setSuccessFade(false); // Reset fade
+
+      const fadeTimer = setTimeout(() => {
+        setSuccessFade(true);
+      }, 2000);
+
+      return () => {
+        clearTimeout(fadeTimer);
+      };
+    }
+  }, [uploadAttempted, file, treeData, error]);
 
   // For example datasets
   useEffect(() => {
@@ -223,10 +236,12 @@ function App() {
         color: 'white',
         padding: sidebarOpen ? '20px' : '0',
         transition: '0.3s ease',
+        overflowY: 'auto',
+        height: '100%'
       }}>
         <div style={{
           opacity: sidebarOpen ? 1 : 0,
-          transition: '0.3s ease'
+          transition: '0.3s ease',
         }}>
           <h1>Upload CSV</h1>
           <form>
@@ -309,7 +324,9 @@ function App() {
               marginTop: '10px',
               fontSize: '14px',
               textAlign: 'center',
-              border: '1px solid #27ae5eff'
+              border: '1px solid #27ae5eff',
+              opacity: successFade ? 0 : 1,
+              transition: 'opacity 1s ease'
             }}>
               Tree successfully generated!
             </div>
@@ -328,6 +345,7 @@ function App() {
               <li>Must have 2 columns</li>
               <li>First row should be headers: owner, name</li>
               <li>Each row represents a parent-child relationship</li>
+              <li>The visualizer can only plot up to 60 nodes without overlap</li>
             </ul>
             <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
               Example:<br />
@@ -337,8 +355,8 @@ function App() {
             </div>
           </div>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px' }}>
-              Try an example:
+            <label style={{ fontSize: '14px', display: 'block', marginTop: '10px', marginBottom: '8px' }}>
+              <strong>Try an example:</strong>
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {Object.keys(exampleCSVs).map(name => (
