@@ -115,6 +115,7 @@ const TreeVisualization = ({ treeData }) => {
 
   useEffect(() => {
     if (!treeData) return;
+    setIsExpanded(false);
     let nodeIDCounter = 0;
 
     // Enables use of update function

@@ -5,7 +5,8 @@ import * as d3 from 'd3';
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
-  "US Counties": "/uscounties_clean_small.csv"
+  "Small Dataset": "/uscounties_clean_small.csv",
+  "Large Dataset": "/uscounties_trimmed.csv"
 }
 
 function App() {
