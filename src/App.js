@@ -21,6 +21,8 @@ function App() {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [selectedExample, setSelectedExample] = useState("");
   const [successFade, setSuccessFade] = useState(false);
+  const [isClearHovered, setIsClearHovered] = useState(false);
+  const [hoveredExample, setHoveredExample] = useState(null);
 
   useEffect(() => {
     if (uploadAttempted && !file) {
@@ -345,8 +347,10 @@ function App() {
                 setError('');
                 setSuccessFade(false);
               }}
+              onMouseEnter={() => setIsClearHovered(true)}
+              onMouseLeave={() => setIsClearHovered(false)}
               style={{
-                backgroundColor: '#e74c3c',
+                backgroundColor: isClearHovered ? '#e74d3c91' : '#e74c3c',
                 color: 'white',
                 padding: '8px',
                 borderRadius: '5px',
@@ -354,7 +358,7 @@ function App() {
                 fontSize: '14px',
                 fontWeight: 'bold',
                 textAlign: 'center',
-                border: '1px solid #c0392b',
+                border: '2px solid #e74c3c',
                 cursor: 'pointer',
                 width: '100%',
               }}
@@ -394,8 +398,10 @@ function App() {
                 <button
                   key={name}
                   onClick={() => setSelectedExample(name)}
+                  onMouseEnter={() => setHoveredExample(name)}
+                  onMouseLeave={() => setHoveredExample(null)}
                   style={{
-                    backgroundColor: '#34495e',
+                    backgroundColor: hoveredExample === name ? '#34495e' : 'transparent',
                     color: 'white',
                     border: '2px solid #3498db',
                     padding: '10px',
