@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 const TreeVisualization = ({ treeData }) => {
-
-
   const [isExpanded, setIsExpanded] = useState(false); // For entire diagram
   const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
   const updateRef = useRef(null); // Update function can be called externally
   const [breadcrumb, setBreadcrumb] = useState([]);
+  const [nodeCount, setNodeCount] = useState(0);
+
   // References
   const svgRef = useRef();
   const rootRef = useRef(null); // D3 hierarchy root
@@ -108,6 +108,30 @@ const TreeVisualization = ({ treeData }) => {
     }
   }
 
+  function countAllNodes(node) {
+    let count = 1;
+    const children = node.children || node._children || [];
+    children.forEach(child => {
+      count += countAllNodes(child);
+    });
+    return count;
+  }
+
+  function downloadSVG() {
+    const svg = svgRef.current;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'tree-visualization.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
 
   ////////////////////
   // Tree Rendering //
@@ -129,14 +153,14 @@ const TreeVisualization = ({ treeData }) => {
 
     const containerWidth = 1200;
     const containerHeight = 800;
-    const width = 4000;
-    const height = 3000;
+    const width = 6000;
+    const height = 45000;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
     // Group for ALL nodes and links
     const mainGroup = svg.append("g");
     mainGroupRef.current = mainGroup;
 
-    svg.attr("width", containerWidth).attr("height", containerHeight);
+    svg.attr("width", "100%").attr("height", containerHeight);
 
     // Zoom and pan
     const zoom = d3.zoom()
@@ -311,6 +335,8 @@ const TreeVisualization = ({ treeData }) => {
     root.x0 = width / 2;
     root.y0 = margin.top;
     update(root);
+    const totalNodes = countAllNodes(root);
+    setNodeCount(totalNodes);
 
     const initialScale = 0.3;
     const initialTranslateX = containerWidth / 2 - (width / 2) * initialScale;
@@ -414,14 +440,16 @@ const TreeVisualization = ({ treeData }) => {
       }}>
         {breadcrumb.length > 0 ? breadcrumb.join(' \u2192 ') : 'Hover over a node to see the breadcrumb trail'}
       </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '10px',
-        gap: '15px'
-      }}>
-        <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '10px',
+          gap: '15px',
+        }}
+      >
+        <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
           Click nodes to expand/collapse
         </p>
         <button
@@ -435,13 +463,54 @@ const TreeVisualization = ({ treeData }) => {
             cursor: 'pointer',
             fontSize: '14px',
             fontWeight: 'bold',
-            marginBottom: '5px'
+            marginBottom: '5px',
+            minWidth: '130px',
           }}
         >
-          {isExpanded ? "Collapse All" : "Expand All"}
+          {isExpanded ? 'Collapse All' : 'Expand All'}
+        </button>
+
+        {/* Download SVG Button */}
+        <button
+          onClick={() => {
+            if (nodeCount > 60) {
+              const confirmed = window.confirm(
+                `Warning: Tree has ${nodeCount} nodes. Downloaded diagram may have overlapping nodes.\n\nProceed with download?`
+              );
+              if (!confirmed) return;
+            }
+
+            if (!isExpanded) {
+              toggleExpandCollapse();
+              setTimeout(downloadSVG, 600);
+            } else {
+              downloadSVG();
+            }
+          }}
+          style={{
+            backgroundColor: '#27ae60',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            marginBottom: '5px',
+          }}
+        >
+          Download SVG
         </button>
       </div>
-      <div style={{ border: "2px solid #ccc", borderRadius: "8px", overflow: "hidden", background: "#fafafa" }}>
+
+      <div
+        style={{
+          border: '2px solid #ccc',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          background: '#fafafa',
+        }}
+      >
         <svg ref={svgRef}></svg>
       </div>
     </div>
