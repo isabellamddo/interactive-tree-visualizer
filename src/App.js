@@ -321,15 +321,46 @@ function App() {
               color: 'white',
               padding: '8px',
               borderRadius: '5px',
-              marginTop: '10px',
+              marginTop: successFade ? 0 : '10px',
               fontSize: '14px',
               textAlign: 'center',
               border: '1px solid #27ae5eff',
               opacity: successFade ? 0 : 1,
-              transition: 'opacity 1s ease'
+              transition: 'opacity 2s ease',
+              position: successFade ? 'absolute' : 'static',
+              visibility: successFade ? 'hidden' : 'visible',
+              pointerEvents: 'none'
             }}>
               Tree successfully generated!
             </div>
+          )}
+
+          {treeData && successFade && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setTreeData(null);
+                setFile(null);
+                setSelectedExample("");
+                setError('');
+                setSuccessFade(false);
+              }}
+              style={{
+                backgroundColor: '#e74c3c',
+                color: 'white',
+                padding: '8px',
+                borderRadius: '5px',
+                marginTop: '10px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                border: '1px solid #c0392b',
+                cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              Clear Tree
+            </button>
           )}
 
           <div style={{
