@@ -8,7 +8,7 @@ const TreeVisualization = ({ treeData }) => {
   const [breadcrumb, setBreadcrumb] = useState([]);
   const [nodeCount, setNodeCount] = useState(0);
   const defaultColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-  const [customColors, setCustomColors] = useState([defaultColors.slice()]);
+  const [customColors, setCustomColors] = useState(defaultColors.slice());
 
   // References
   const svgRef = useRef();
@@ -29,8 +29,7 @@ const TreeVisualization = ({ treeData }) => {
   }
 
   function getNodeColor(node) {
-    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-    return colors[node.depth % colors.length];
+    return customColors[node.depth % customColors.length];
   }
 
   function collapse(d) {
@@ -355,8 +354,13 @@ const TreeVisualization = ({ treeData }) => {
 
   const handleColorChange = (index, newColor) => {
     const newColors = customColors.slice();
-    newColors[index] = newColor;
+    newColors[index] = newColor; // Update specific colorin custom colors array
     setCustomColors(newColors);
+
+    // Force immediate update
+    setTimeout(() => {
+      updateNodeColors();
+    }, 0);
   }
 
   const resetColors = () => {
@@ -364,12 +368,12 @@ const TreeVisualization = ({ treeData }) => {
   }
 
   const updateNodeColors = () => {
-    if (!mainGroupRef.current) return;
-    
-    mainGroupRef.current.selectAll('g.node').each(function(node) {
+    if (!mainGroupRef.current) return; // Only if nodes are rendered
+
+    mainGroupRef.current.selectAll('g.node').each(function (node) {
       const nodeGroup = d3.select(this);
       const canExpand = node.children || node._children;
-      
+
       if (canExpand) {
         nodeGroup.select('ellipse').style('fill', customColors[node.depth % customColors.length]);
       } else {
@@ -377,6 +381,13 @@ const TreeVisualization = ({ treeData }) => {
       }
     });
   };
+
+  // If custom colors changes and treedata is rendered
+  useEffect(() => {
+    if (treeData && mainGroupRef.current) {
+      updateNodeColors();
+    }
+  }, [customColors, treeData]);
 
   const toggleExpandCollapse = () => {
     if (!rootRef.current || !updateRef.current) return;
@@ -397,8 +408,6 @@ const TreeVisualization = ({ treeData }) => {
   };
 
   // Legend data
-  const legendColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-
   const Legend = () => (
     <div style={{
       display: 'flex',
@@ -428,15 +437,21 @@ const TreeVisualization = ({ treeData }) => {
       <div>
         <strong>Colors by Level:</strong>
         <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-          {legendColors.slice(0, maxDepth).map((color, index) => (
+          {customColors.slice(0, maxDepth).map((color, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                backgroundColor: color,
-                border: '1px solid #333',
-                borderRadius: '3px'
-              }}></div>
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => handleColorChange(index, e.target.value)}
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  border: '2px solid #333',
+                  borderRadius: '3px',
+                  cursor: 'pointer'
+                }}
+                title={`Choose color for Level ${index}`}
+              />
               <span>Level {index}</span>
             </div>
           ))}
