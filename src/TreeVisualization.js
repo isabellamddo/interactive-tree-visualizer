@@ -7,6 +7,8 @@ const TreeVisualization = ({ treeData }) => {
   const updateRef = useRef(null); // Update function can be called externally
   const [breadcrumb, setBreadcrumb] = useState([]);
   const [nodeCount, setNodeCount] = useState(0);
+  const defaultColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+  const [customColors, setCustomColors] = useState([defaultColors.slice()]);
 
   // References
   const svgRef = useRef();
@@ -351,6 +353,30 @@ const TreeVisualization = ({ treeData }) => {
 
   }, [treeData]);
 
+  const handleColorChange = (index, newColor) => {
+    const newColors = customColors.slice();
+    newColors[index] = newColor;
+    setCustomColors(newColors);
+  }
+
+  const resetColors = () => {
+    setCustomColors(defaultColors.slice());
+  }
+
+  const updateNodeColors = () => {
+    if (!mainGroupRef.current) return;
+    
+    mainGroupRef.current.selectAll('g.node').each(function(node) {
+      const nodeGroup = d3.select(this);
+      const canExpand = node.children || node._children;
+      
+      if (canExpand) {
+        nodeGroup.select('ellipse').style('fill', customColors[node.depth % customColors.length]);
+      } else {
+        nodeGroup.select('rect').style('fill', customColors[node.depth % customColors.length]);
+      }
+    });
+  };
 
   const toggleExpandCollapse = () => {
     if (!rootRef.current || !updateRef.current) return;
