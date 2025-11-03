@@ -427,19 +427,6 @@ const TreeVisualization = ({ treeData }) => {
         <h2 style={{ fontSize: '36px', margin: '0', color: '#2c3e50' }}>Interactive Tree Visualizer</h2>
       </div>
 
-      <Legend />
-      <div style={{
-        padding: '10px',
-        backgroundColor: '#ecf0f1',
-        borderRadius: '5px',
-        marginBottom: '10px',
-        fontSize: '14px',
-        fontWeight: '500',
-        color: breadcrumb.length > 0 ? '#2c3e50' : '#7f8c8d',
-        fontStyle: breadcrumb.length > 0 ? 'normal' : 'italic'
-      }}>
-        {breadcrumb.length > 0 ? breadcrumb.join(' \u2192 ') : 'Hover over a node to see the breadcrumb trail'}
-      </div>
       <div
         style={{
           display: 'flex',
@@ -502,6 +489,21 @@ const TreeVisualization = ({ treeData }) => {
           Download SVG
         </button>
       </div>
+
+      <div style={{
+        padding: '10px',
+        backgroundColor: '#ecf0f1',
+        borderRadius: '5px',
+        marginBottom: '10px',
+        fontSize: '14px',
+        fontWeight: '500',
+        color: breadcrumb.length > 0 ? '#2c3e50' : '#7f8c8d',
+        fontStyle: breadcrumb.length > 0 ? 'normal' : 'italic'
+      }}>
+        {breadcrumb.length > 0 ? breadcrumb.join(' \u2192 ') : 'Hover over a node to see the breadcrumb trail'}
+      </div>
+
+      <Legend />
 
       <div
         style={{
