@@ -7,6 +7,7 @@ const TreeVisualization = ({ treeData }) => {
   const updateRef = useRef(null); // Update function can be called externally
   const [breadcrumb, setBreadcrumb] = useState([]);
   const [nodeCount, setNodeCount] = useState(0);
+  const tooltipRef = useRef(null);
 
   // References
   const svgRef = useRef();
@@ -161,6 +162,19 @@ const TreeVisualization = ({ treeData }) => {
     mainGroupRef.current = mainGroup;
 
     svg.attr("width", "100%").attr("height", containerHeight);
+
+    //Tooltip
+    const tooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'tree-tooltip')
+      .style('position', 'absolute')
+      .style('padding', '5px')
+      .style('background', 'white')
+      .style('border', '1px solid black')
+      .style('pointer-events', 'none')
+      .style('opacity', 0);
+
+    tooltipRef.current = tooltip;
 
     // Zoom and pan
     const zoom = d3.zoom()

@@ -1,15 +1,20 @@
 export function buildTree(data) {
 
     const childrenMap = new Map();
+    const definitionMap = new Map();
     const allChildren = new Set();
     const allOwners = [];
 
-    data.forEach(({ owner, name }) => {
+    data.forEach(({ owner, name, definition }) => {
         if (!childrenMap.has(owner)) {
             childrenMap.set(owner, []);
         }
         childrenMap.get(owner).push(name);
         allChildren.add(name);
+
+        if (definition && definition.trim()) {
+            definitionMap.set(name, definition.trim());
+        }
     });
 
     for (const owner of childrenMap.keys()) {
@@ -33,15 +38,16 @@ export function buildTree(data) {
         console.log(`${nodeName},${depth}`);
 
         const nodeId = nodeIDCounter++;
-        
+
 
         const children = childrenMap.get(nodeName) || [];
 
         return {
             id: nodeId,
             name: nodeName,
+            definition: definitionMap.get(nodeName) || null,
             parentID: parentID,
-            children: children.map(childName => 
+            children: children.map(childName =>
                 buildNode(childName, nodeId, depth + 1)
             )
         };

@@ -125,8 +125,8 @@ function App() {
 
     const headers = lines[0].split(',').map(h => h.trim());
 
-    if (headers.length !== 2) {
-      return { valid: false, error: 'Data does not have exactly 2 columns. Should have "owner,name".' }
+    if (headers.length < 2 || headers.length > 3) {
+      return { valid: false, error: 'Data must have 2 or 3 columns. Should have "owner,name" or "owner,name,definition".' }
     }
 
     if (!headers.includes('owner')) {
@@ -378,16 +378,17 @@ function App() {
           }}>
             <strong>CSV Format:</strong>
             <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
-              <li>Must have 2 columns</li>
-              <li>First row should be headers: owner, name</li>
+              <li>Must have 2 or 3 columns</li>
+              <li>First row should be headers: owner, name (Optional: definition)</li>
               <li>Each row represents a parent-child relationship</li>
+              <li>The root node does not need it's own row (Ex. Do not include _,root)</li>
               <li>The visualizer can only plot up to 60 nodes without overlap</li>
             </ul>
             <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
               Example:<br />
-              owner,name<br />
+              owner,name,definition<br />
               root,child1<br />
-              root,child2
+              root,child2,this is child two
             </div>
           </div>
           <div style={{ marginBottom: '20px' }}>
