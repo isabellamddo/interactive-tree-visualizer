@@ -263,10 +263,40 @@ const TreeVisualization = ({ treeData }) => {
         .style('cursor', 'pointer')
         .on('click', click)
         .on('mouseenter', function (event, d) {
+          console.log('Hovered node:', d.data.name, 'Definition:', d.data.definition); // ADD THIS
+
           highlightPath(d);
+          // If node has a definition
+          if (d.data.definition) {
+            const tooltip = tooltipRef.current;
+
+            tooltip.interrupt();
+
+            // Get the node's position
+            const nodeElement = this.getBoundingClientRect();
+            const tooltipNode = tooltip.node();
+
+            tooltip.html(`<strong>${d.data.name}</strong><br/>${d.data.definition}`)
+              .style('opacity', 1);
+
+            // Position centered below the node
+            const tooltipWidth = tooltipNode.offsetWidth;
+            const left = nodeElement.left + (nodeElement.width / 2) - (tooltipWidth / 2);
+            const top = nodeElement.bottom + 10;
+
+            tooltip.style('left', left + 'px')
+              .style('top', top + 'px');
+          }
         })
         .on('mouseleave', function () {
           highlightPath(null);
+          const tooltip = tooltipRef.current;
+
+          tooltip.interrupt();
+          
+          tooltip.transition()
+            .duration(200)
+            .style('opacity', 0);
         });
 
       // Text and rectangle
@@ -277,6 +307,7 @@ const TreeVisualization = ({ treeData }) => {
           .attr('dy', '0.35em')
           .style('font-family', 'Arial, sans-serif')
           .style('font-size', '11px')
+          .style('pointer-events', 'all')
           .text(getNodeName(node));
 
         // Measure text size to fit in shape
@@ -295,7 +326,8 @@ const TreeVisualization = ({ treeData }) => {
             .attr('ry', (bbox.height + paddingY * 2) / 2)
             .style('fill', getNodeColor(node))
             .style('stroke', '#333')
-            .style('stroke-width', '1.5px');
+            .style('stroke-width', '1.5px')
+            .style('pointer-events', 'all');
 
           ellipse.lower(); // Set behinf text
         } else { // Rectangle for non expandable nodes
@@ -306,7 +338,8 @@ const TreeVisualization = ({ treeData }) => {
             .attr('height', bbox.height + paddingY * 2)
             .style('fill', getNodeColor(node))
             .style('stroke', '#333')
-            .style('stroke-width', '1px');
+            .style('stroke-width', '1px')
+            .style('pointer-events', 'all');
 
           rect.lower();
         }
@@ -362,6 +395,12 @@ const TreeVisualization = ({ treeData }) => {
     // Attach helpers for button
     rootRef.current.expand = expand;
     rootRef.current.collapse = collapse;
+
+    return () => {
+      if (tooltipRef.current) {
+        tooltipRef.current.remove();
+      }
+    };
 
   }, [treeData]);
 
