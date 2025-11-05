@@ -2,12 +2,18 @@ import logo from './logo.svg';
 import TreeVisualization from './TreeVisualization';
 import './App.css';
 import * as d3 from 'd3';
+import Papa from 'papaparse';
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
   "Small Dataset": "/uscounties_clean_small.csv",
-  "Large Dataset": "/uscounties_trimmed.csv"
+  "Large Dataset": "/humananatomy.csv"
 }
+
+const exampleDescriptions = {
+  "Small Dataset": "A smaller tree with ~20 nodes showing US counties. Good for testing and quick visualization.",
+  "Large Dataset": "A comprehensive tree with 50+ nodes covering multiple US counties and their hierarchies."
+};
 
 function App() {
   console.log('D3 imported', typeof d3.select);
@@ -64,42 +70,31 @@ function App() {
         .then(response => response.text())
         .then(csvOutput => {
           // Same code from handleOnSubmit
-          const validation = validateHeaders(csvOutput);
+          // Parse with PapaParse
+          const parsed = Papa.parse(csvOutput, {
+            header: true,
+            skipEmptyLines: true
+          });
 
-          if (!validation.valid) {
-            setError(validation.error);
+          // Validate headers
+          const headers = Object.keys(parsed.data[0] || {});
+
+          if (!headers.includes('owner') || !headers.includes('name')) {
+            setError('Missing required columns: owner and name');
             return;
           }
 
           setError('');
 
-          const csvData = csvOutput.split('\n');
-          const csvLines = [];
-          for (const line of csvData) {
-            if (line.trim() !== '') {
-              csvLines.push(line);
-            }
-          }
+          const data = parsed.data.map(row => ({
+            owner: row.owner,
+            name: row.name,
+            definition: row.definition || null
+          }));
 
-          const headerRow = csvLines[0];
-          const headerNames = headerRow.split(',');
-          const headers = [];
-
-          for (const header of headerNames) {
-            headers.push(header.trim());
-          }
-          const data = [];
-
-          for (let i = 1; i < csvLines.length; i++) {
-            const values = csvLines[i].split(',').map(v => v.trim());
-            data.push({
-              owner: values[headers.indexOf('owner')],
-              name: values[headers.indexOf('name')]
-            });
-          }
-
-          console.log('Owners:', [...new Set(data.map(d => d.owner))].length);
-          console.log('Names:', [...new Set(data.map(d => d.name))].length);
+          console.log('First 5 rows of parsed data:', data.slice(0, 5));
+          console.log('Sample row:', data[0]);
+          console.log('Keys in first row:', Object.keys(data[0]));
 
           try {
             const tree = buildTree(data);
@@ -117,29 +112,6 @@ function App() {
 
   const fileReader = new FileReader();
 
-  const validateHeaders = (csvText) => {
-    const lines = csvText.split('\n');
-    if (lines.length === 0) {
-      return { valid: false, error: 'No owner, name column headers found.' }
-    }
-
-    const headers = lines[0].split(',').map(h => h.trim());
-
-    if (headers.length < 2 || headers.length > 3) {
-      return { valid: false, error: 'Data must have 2 or 3 columns. Should have "owner,name" or "owner,name,definition".' }
-    }
-
-    if (!headers.includes('owner')) {
-      return { valid: false, error: 'Missing "owner" column.' }
-    }
-
-    if (!headers.includes('name')) {
-      return { valid: false, error: 'Missing "name" column.' }
-    }
-
-    return { valid: true }
-  }
-
   // User selected a file
   const handleOnChange = (e) => {
     setFile(e.target.files[0]);
@@ -154,45 +126,27 @@ function App() {
       fileReader.onload = function (event) {
         const csvOutput = event.target.result;
 
-        const validation = validateHeaders(csvOutput);
+        // Parse with PapaParse
+        const parsed = Papa.parse(csvOutput, {
+          header: true,
+          skipEmptyLines: true
+        });
 
-        if (!validation.valid) {
-          setError(validation.error);
+        // Validate headers
+        const headers = Object.keys(parsed.data[0] || {});
+
+        if (!headers.includes('owner') || !headers.includes('name')) {
+          setError('Missing required columns: owner and name');
           return;
         }
 
         setError('');
 
-        // Convert CSV to data format
-        const csvData = csvOutput.split('\n');
-        const csvLines = [];
-        for (const line of csvData) {
-          if (line.trim() !== '') { // Non empty input
-            csvLines.push(line);
-          }
-        }
-
-        const headerRow = csvLines[0];
-        const headerNames = headerRow.split(',');
-        const headers = [];
-
-        for (const header of headerNames) {
-          headers.push(header.trim());
-        }
-        const data = [];
-
-        for (let i = 1; i < csvLines.length; i++) {
-          const values = csvLines[i].split(',').map(v => v.trim());
-          data.push({
-            owner: values[headers.indexOf('owner')],
-            name: values[headers.indexOf('name')]
-          });
-        }
-
-        const parentChild = new Map();
-        data.forEach(({ owner, name }) => {
-          parentChild.set(name, owner);
-        });
+        const data = parsed.data.map(row => ({
+          owner: row.owner,
+          name: row.name,
+          definition: row.definition || null
+        }));
 
         console.log('Owners:', [...new Set(data.map(d => d.owner))].length);
         console.log('Names:', [...new Set(data.map(d => d.name))].length);
