@@ -148,13 +148,27 @@ const TreeVisualization = ({ treeData }) => {
     rootRef.current = root;
     setMaxDepth(getFullDepth(treeData));
 
+    // Calculate width based on widest level
+    function getMaxNodesAtAnyLevel(node) {
+      const levelCounts = {};
+      function count(n, depth) {
+        levelCounts[depth] = (levelCounts[depth] || 0) + 1;
+        const children = n._children || n.children || [];
+        children.forEach(child => count(child, depth + 1));
+      }
+      count(node, 0);
+      return Math.max(...Object.values(levelCounts));
+    }
+
+    const maxNodesAtLevel = getMaxNodesAtAnyLevel(root);
+    const width = Math.max(1500, maxNodesAtLevel * 200); // 200px per node, minimum 1500px
+
     // Container for diagram
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear old diagrams
 
     const containerWidth = 1200;
     const containerHeight = 800;
-    const width = 6000;
     const height = 45000;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
     // Group for ALL nodes and links
@@ -263,7 +277,6 @@ const TreeVisualization = ({ treeData }) => {
         .style('cursor', 'pointer')
         .on('click', click)
         .on('mouseenter', function (event, d) {
-          console.log('Hovered node:', d.data.name, 'Definition:', d.data.definition); // ADD THIS
 
           highlightPath(d);
           // If node has a definition
@@ -409,6 +422,14 @@ const TreeVisualization = ({ treeData }) => {
     if (!rootRef.current || !updateRef.current) return;
     const root = rootRef.current;
 
+    // Warn before expanding large trees
+    if (!isExpanded && nodeCount > 40) {
+      const confirmed = window.confirm(
+        `Warning: This tree has ${nodeCount} nodes. Expanding all nodes may freeze your browser temporarily.\n\nContinue?`
+      );
+      if (!confirmed) return;
+    }
+
     if (isExpanded) {
       if (root.children) {
         root.children.forEach(child => {
@@ -419,7 +440,7 @@ const TreeVisualization = ({ treeData }) => {
       root.expand(root);
     }
 
-    updateRef.current(root);
+    updateRef.current(root, true);
     setIsExpanded(!isExpanded);
   };
 
@@ -513,19 +534,12 @@ const TreeVisualization = ({ treeData }) => {
         {/* Download SVG Button */}
         <button
           onClick={() => {
-            if (nodeCount > 60) {
-              const confirmed = window.confirm(
-                `Warning: Tree has ${nodeCount} nodes. Downloaded diagram may have overlapping nodes.\n\nProceed with download?`
-              );
-              if (!confirmed) return;
-            }
+            const confirmed = window.confirm(
+              `The SVG will capture the tree in its current state and zoom level.\n\nMake sure the tree is positioned as you want it before downloading.\n\nProceed with download?`
+            );
+            if (!confirmed) return;
 
-            if (!isExpanded) {
-              toggleExpandCollapse();
-              setTimeout(downloadSVG, 600);
-            } else {
-              downloadSVG();
-            }
+            downloadSVG();
           }}
           style={{
             backgroundColor: '#27ae60',

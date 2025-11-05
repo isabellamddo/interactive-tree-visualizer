@@ -34,12 +34,7 @@ export function buildTree(data) {
 
     let nodeIDCounter = 0;
     function buildNode(nodeName, parentID = null, depth = 0) {
-
-        console.log(`${nodeName},${depth}`);
-
         const nodeId = nodeIDCounter++;
-
-
         const children = childrenMap.get(nodeName) || [];
 
         return {

@@ -5,12 +5,16 @@ import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
   "US Counties": "/uscounties_clean_small.csv",
-  "Human Anatomy": "/humananatomy.csv"
+  "Human Anatomy": "/humananatomy.csv",
+  "Minecraft Crafting": "/minecraftcrafting.csv",
+  "Computer Architecture": "computerarchitecture.csv"
 }
 
 const exampleDescriptions = {
-  "US Counties": "A smaller tree with 20+ nodes showing US states and counties.",
-  "Human Anatomy": "A larger tree with 40+ nodes showing human body systems, organs, and their components with definitions."
+  "US Counties": "A small tree with 20+ nodes showing US states and counties.",
+  "Human Anatomy": "A large tree with 40+ nodes showing human body systems, organs, and their components with definitions.",
+  "Minecraft Crafting":"A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft.",
+  "Computer Architecture":"A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates."
 };
 
 function App() {
@@ -321,13 +325,14 @@ function App() {
               <li>First row should be headers: owner, name, definition(optional)</li>
               <li>Each row represents a parent-child relationship</li>
               <li>The root node does not get it's own row (Do not include _,root)</li>
+              <li>Definitions should be surrounded by double quotes</li>
               <li>The visualizer can only plot up to 60 nodes without overlap</li>
             </ul>
             <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
               Example:<br />
               owner,name,definition<br />
               root,child1<br />
-              root,child2,this is child two
+              root,child2,"This is child two."
             </div>
           </div>
           <div style={{ marginBottom: '20px' }}>
