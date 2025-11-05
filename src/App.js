@@ -1,23 +1,19 @@
-import logo from './logo.svg';
 import TreeVisualization from './TreeVisualization';
 import './App.css';
-import * as d3 from 'd3';
 import Papa from 'papaparse';
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
-  "Small Dataset": "/uscounties_clean_small.csv",
-  "Large Dataset": "/humananatomy.csv"
+  "US Counties": "/uscounties_clean_small.csv",
+  "Human Anatomy": "/humananatomy.csv"
 }
 
 const exampleDescriptions = {
-  "Small Dataset": "A smaller tree with ~20 nodes showing US counties. Good for testing and quick visualization.",
-  "Large Dataset": "A comprehensive tree with 50+ nodes covering multiple US counties and their hierarchies."
+  "US Counties": "A smaller tree with 20+ nodes showing US states and counties.",
+  "Human Anatomy": "A larger tree with 40+ nodes showing human body systems, organs, and their components with definitions."
 };
 
 function App() {
-  console.log('D3 imported', typeof d3.select);
-
   const [file, setFile] = useState();
   const [treeData, setTreeData] = useState(null);
   const [error, setError] = useState('');
@@ -69,7 +65,6 @@ function App() {
       fetch(exampleCSVs[selectedExample])
         .then(response => response.text())
         .then(csvOutput => {
-          // Same code from handleOnSubmit
           // Parse with PapaParse
           const parsed = Papa.parse(csvOutput, {
             header: true,
@@ -92,14 +87,9 @@ function App() {
             definition: row.definition || null
           }));
 
-          console.log('First 5 rows of parsed data:', data.slice(0, 5));
-          console.log('Sample row:', data[0]);
-          console.log('Keys in first row:', Object.keys(data[0]));
-
           try {
             const tree = buildTree(data);
             setTreeData(tree);
-            console.log('Tree built:', tree);
           } catch (err) {
             setError(err.message);
           }
@@ -109,8 +99,6 @@ function App() {
         });
     }
   }, [selectedExample]);
-
-  const fileReader = new FileReader();
 
   // User selected a file
   const handleOnChange = (e) => {
@@ -123,6 +111,7 @@ function App() {
     setUploadAttempted(true);
 
     if (file) {
+      const fileReader = new FileReader();
       fileReader.onload = function (event) {
         const csvOutput = event.target.result;
 
@@ -148,13 +137,9 @@ function App() {
           definition: row.definition || null
         }));
 
-        console.log('Owners:', [...new Set(data.map(d => d.owner))].length);
-        console.log('Names:', [...new Set(data.map(d => d.name))].length);
-
         try {
           const tree = buildTree(data);
           setTreeData(tree);
-          console.log('Tree built:', tree);
         } catch (err) {
           setError(err.message);
         }
@@ -333,9 +318,9 @@ function App() {
             <strong>CSV Format:</strong>
             <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
               <li>Must have 2 or 3 columns</li>
-              <li>First row should be headers: owner, name (Optional: definition)</li>
+              <li>First row should be headers: owner, name, definition(optional)</li>
               <li>Each row represents a parent-child relationship</li>
-              <li>The root node does not need it's own row (Ex. Do not include _,root)</li>
+              <li>The root node does not get it's own row (Do not include _,root)</li>
               <li>The visualizer can only plot up to 60 nodes without overlap</li>
             </ul>
             <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
@@ -349,26 +334,36 @@ function App() {
             <label style={{ fontSize: '14px', display: 'block', marginTop: '10px', marginBottom: '8px' }}>
               <strong>Try an example:</strong>
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {Object.keys(exampleCSVs).map(name => (
-                <button
-                  key={name}
-                  onClick={() => setSelectedExample(name)}
-                  onMouseEnter={() => setHoveredExample(name)}
-                  onMouseLeave={() => setHoveredExample(null)}
-                  style={{
-                    backgroundColor: hoveredExample === name ? '#34495e' : 'transparent',
-                    color: 'white',
-                    border: '2px solid #3498db',
-                    padding: '10px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {name}
-                </button>
+                <div key={name}>
+                  <button
+                    onClick={() => setSelectedExample(name)}
+                    onMouseEnter={() => setHoveredExample(name)}
+                    onMouseLeave={() => setHoveredExample(null)}
+                    style={{
+                      backgroundColor: hoveredExample === name ? '#34495e' : 'transparent',
+                      color: 'white',
+                      border: '2px solid #3498db',
+                      padding: '10px',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      width: '100%'
+                    }}
+                  >
+                    {name}
+                  </button>
+                  <div style={{
+                    fontSize: '11px',
+                    color: '#95a5a6',
+                    marginTop: '4px',
+                    fontStyle: 'italic'
+                  }}>
+                    {exampleDescriptions[name]}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -399,7 +394,7 @@ function App() {
               <div style={{ fontSize: '80px' }}>{`\u{1F332}`}</div>
               <h2 style={{ fontSize: '48px', margin: '0' }}>Interactive Tree Visualizer</h2>
               <p style={{ fontSize: '18px', margin: '0' }}>
-                Upload a CSV file and click "Upload & Visualize" to get started
+                Select a CSV file and click "Upload & Visualize" to get started
               </p>
             </div>
           )}
