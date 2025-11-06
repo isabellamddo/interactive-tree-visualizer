@@ -4,15 +4,17 @@ import * as d3 from 'd3';
 const TreeVisualization = ({ treeData }) => {
   const [isExpanded, setIsExpanded] = useState(false); // For entire diagram
   const [maxDepth, setMaxDepth] = useState(0); // Dynamic legend
-  const updateRef = useRef(null); // Update function can be called externally
   const [breadcrumb, setBreadcrumb] = useState([]);
   const [nodeCount, setNodeCount] = useState(0);
-  const tooltipRef = useRef(null);
+  const [showTooltips, setShowTooltips] = useState(true);
 
   // References
+  const updateRef = useRef(null); // Update function can be called externally
   const svgRef = useRef();
   const rootRef = useRef(null); // D3 hierarchy root
+  const tooltipRef = useRef(null);
   const mainGroupRef = useRef(null);
+  const showTooltipsRef = useRef(true);
 
   //////////////////////
   // Helper functions //
@@ -133,6 +135,9 @@ const TreeVisualization = ({ treeData }) => {
     URL.revokeObjectURL(url);
   }
 
+  useEffect(() => {
+    showTooltipsRef.current = showTooltips;
+  }, [showTooltips]);
 
   ////////////////////
   // Tree Rendering //
@@ -280,7 +285,7 @@ const TreeVisualization = ({ treeData }) => {
 
           highlightPath(d);
           // If node has a definition
-          if (d.data.definition) {
+          if (d.data.definition && showTooltipsRef.current) {
             const tooltip = tooltipRef.current;
 
             tooltip.interrupt();
@@ -306,7 +311,7 @@ const TreeVisualization = ({ treeData }) => {
           const tooltip = tooltipRef.current;
 
           tooltip.interrupt();
-          
+
           tooltip.transition()
             .duration(200)
             .style('opacity', 0);
@@ -529,6 +534,24 @@ const TreeVisualization = ({ treeData }) => {
           }}
         >
           {isExpanded ? 'Collapse All' : 'Expand All'}
+        </button>
+
+        <button
+          onClick={() => setShowTooltips(prev => !prev)}
+          style={{
+            backgroundColor: showTooltips ? '#e67e22' : '#95a5a6',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            marginBottom: '5px',
+            minWidth: '130px',
+          }}
+        >
+          {showTooltips ? 'Hide Definitions' : 'Show Definitions'}
         </button>
 
         {/* Download SVG Button */}
