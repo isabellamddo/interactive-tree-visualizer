@@ -173,8 +173,9 @@ const TreeVisualization = ({ treeData }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear old diagrams
 
-    const containerWidth = 1200;
-    const containerHeight = 800;
+    const svgNode = svgRef.current;
+    const containerWidth = svgNode.parentElement.clientWidth;
+    const containerHeight = 600;
     const height = 45000;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
     // Group for ALL nodes and links
@@ -407,7 +408,7 @@ const TreeVisualization = ({ treeData }) => {
     setNodeCount(totalNodes);
 
     const initialScale = 0.3;
-    const initialTranslateX = containerWidth / 2 - (width / 2) * initialScale;
+    const initialTranslateX = (containerWidth / 2) - (width * initialScale / 2);
     const initialTranslateY = 50;
     svg.call(zoom.transform, d3.zoomIdentity
       .translate(initialTranslateX, initialTranslateY)
@@ -452,21 +453,34 @@ const TreeVisualization = ({ treeData }) => {
     setIsExpanded(!isExpanded);
   };
 
-  const resetZoom = () => {
+  const fitToScreen = () => {
     const svg = d3.select(svgRef.current);
+    const mainGroup = mainGroupRef.current;
     const zoom = zoomRef.current;
-    if (!svg || !zoom) return;
+    if (!svg || !mainGroup || !zoom) return;
 
-    const containerWidth = 1200;
-    const initialScale = 0.3;
-    const initialTranslateX = containerWidth / 2 - (1500 / 2) * initialScale;
-    const initialTranslateY = 50;
+    const bounds = mainGroup.node().getBBox();
+    const svgNode = svgRef.current;
+    const containerWidth = svgNode.parentElement.clientWidth;
+    const containerHeight = 600;
+    const padding = 50;
+
+    const fullWidth = bounds.width;
+    const fullHeight = bounds.height;
+
+    const scale = Math.min(
+      (containerWidth - padding * 2) / fullWidth,
+      (containerHeight - padding * 2) / fullHeight
+    );
+
+    const translateX = (containerWidth / 2) - ((bounds.x + fullWidth / 2) * scale)
+    const translateY = (containerHeight - fullHeight * scale) / 2 - bounds.y * scale;
 
     svg.transition()
       .duration(750)
       .call(zoom.transform, d3.zoomIdentity
-        .translate(initialTranslateX, initialTranslateY)
-        .scale(initialScale));
+        .translate(translateX, translateY)
+        .scale(scale));
   };
 
   // Legend data
@@ -570,9 +584,10 @@ const TreeVisualization = ({ treeData }) => {
         >
           {showTooltips ? 'Hide Definitions' : 'Show Definitions'}
         </button>
-        {/* Reset Zoom Button */}
+
+        {/* Fit to Screen Button */}
         <button
-          onClick={resetZoom}
+          onClick={fitToScreen}
           style={{
             backgroundColor: '#d45caaff',
             color: 'white',
@@ -585,7 +600,7 @@ const TreeVisualization = ({ treeData }) => {
             marginBottom: '5px',
           }}
         >
-          Reset Zoom
+          Fit to Screen
         </button>
 
         {/* Download SVG Button */}
