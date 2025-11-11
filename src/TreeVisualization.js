@@ -7,6 +7,7 @@ const TreeVisualization = ({ treeData }) => {
   const [breadcrumb, setBreadcrumb] = useState([]);
   const [nodeCount, setNodeCount] = useState(0);
   const [showTooltips, setShowTooltips] = useState(true);
+  const zoomRef = useRef(null);
 
   // References
   const updateRef = useRef(null); // Update function can be called externally
@@ -30,7 +31,7 @@ const TreeVisualization = ({ treeData }) => {
   }
 
   function getNodeColor(node) {
-    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+    const colors = ['#FF6663', '#FEB144', '#FDFD97', '#9EE09E', '#9EC1CF', '#CC99C9', '#ff9ff3'];
     return colors[node.depth % colors.length];
   }
 
@@ -202,6 +203,7 @@ const TreeVisualization = ({ treeData }) => {
         mainGroup.attr("transform", event.transform);
       });
     svg.call(zoom);
+    zoomRef.current = zoom;
 
     // Tree layout
     const treemap = d3.tree();
@@ -295,7 +297,8 @@ const TreeVisualization = ({ treeData }) => {
             const tooltipNode = tooltip.node();
 
             tooltip.html(`<strong>${d.data.name}</strong><br/>${d.data.definition}`)
-              .style('opacity', 1);
+              .style('opacity', 1)
+              .style('max-width', '400px');
 
             // Position centered below the node
             const tooltipWidth = tooltipNode.offsetWidth;
@@ -449,15 +452,32 @@ const TreeVisualization = ({ treeData }) => {
     setIsExpanded(!isExpanded);
   };
 
+  const resetZoom = () => {
+    const svg = d3.select(svgRef.current);
+    const zoom = zoomRef.current;
+    if (!svg || !zoom) return;
+
+    const containerWidth = 1200;
+    const initialScale = 0.3;
+    const initialTranslateX = containerWidth / 2 - (1500 / 2) * initialScale;
+    const initialTranslateY = 50;
+
+    svg.transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity
+        .translate(initialTranslateX, initialTranslateY)
+        .scale(initialScale));
+  };
+
   // Legend data
-  const legendColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+  const legendColors = ['#FF6663', '#FEB144', '#FDFD97', '#9EE09E', '#9EC1CF', '#CC99C9', '#ff9ff3'];
 
   const Legend = () => (
     <div style={{
       display: 'flex',
       justifyContent: 'center',
       gap: '40px',
-      padding: '15px',
+      paddingBottom: '15px',
       borderRadius: '8px',
       fontSize: '14px'
     }}>
@@ -468,7 +488,7 @@ const TreeVisualization = ({ treeData }) => {
             <svg width="30" height="20">
               <ellipse cx="15" cy="10" rx="14" ry="9" fill="#87ceeb" stroke="#333" strokeWidth="1" />
             </svg>
-            <span>Can expand/collapse</span>
+            <span>Click to expand/collapse</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg width="30" height="20">
@@ -481,16 +501,16 @@ const TreeVisualization = ({ treeData }) => {
       <div>
         <strong>Colors by Level:</strong>
         <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-          {legendColors.slice(0, maxDepth).map((color, index) => (
+          {Array.from({ length: maxDepth }).map((_, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{
                 width: '20px',
                 height: '20px',
-                backgroundColor: color,
+                backgroundColor: legendColors[index % legendColors.length],
                 border: '1px solid #333',
                 borderRadius: '3px'
               }}></div>
-              <span>Level {index}</span>
+              <span>{index === 0 ? 'Root' : `Level ${index}`}</span>
             </div>
           ))}
         </div>
@@ -515,9 +535,6 @@ const TreeVisualization = ({ treeData }) => {
           gap: '15px',
         }}
       >
-        <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
-          Click nodes to expand/collapse
-        </p>
         <button
           onClick={toggleExpandCollapse}
           style={{
@@ -552,6 +569,23 @@ const TreeVisualization = ({ treeData }) => {
           }}
         >
           {showTooltips ? 'Hide Definitions' : 'Show Definitions'}
+        </button>
+        {/* Reset Zoom Button */}
+        <button
+          onClick={resetZoom}
+          style={{
+            backgroundColor: '#d45caaff',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            marginBottom: '5px',
+          }}
+        >
+          Reset Zoom
         </button>
 
         {/* Download SVG Button */}

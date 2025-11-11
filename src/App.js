@@ -5,16 +5,18 @@ import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
   "US Counties": "/uscounties_clean_small.csv",
+  "CNU CS Curriculum" : "/cnucs.csv",
   "Human Anatomy": "/humananatomy.csv",
   "Minecraft Crafting": "/minecraftcrafting.csv",
   "Computer Architecture": "computerarchitecture.csv"
 }
 
 const exampleDescriptions = {
-  "US Counties": "A small tree with 20+ nodes showing US states and counties.",
+  "US Counties": "A small tree with 20+ nodes showing US states and counties. ",
+  "CNU CS Curriculum" : "CNU's Computer Science courses in order of their pre/corequisites.Source: CNU Undergraduate Cataloge Vol. 60",
   "Human Anatomy": "A large tree with 40+ nodes showing human body systems, organs, and their components with definitions.",
-  "Minecraft Crafting":"A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft.",
-  "Computer Architecture":"A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates."
+  "Minecraft Crafting": "A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft. Paraphrased from the Minecraft Wiki.",
+  "Computer Architecture": "A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates. Paraphrased from Patterson & Hennessy (Computer Organization and Design) and Wikipedia's 'Memory hierarchy'."
 };
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
   const [successFade, setSuccessFade] = useState(false);
   const [isClearHovered, setIsClearHovered] = useState(false);
   const [hoveredExample, setHoveredExample] = useState(null);
+  const [showCsvInfo, setShowCsvInfo] = useState(false);
 
   useEffect(() => {
     if (uploadAttempted && !file) {
@@ -313,33 +316,55 @@ function App() {
 
           <div style={{
             marginTop: '20px',
-            padding: '15px',
+            padding: '10px',
             backgroundColor: '#34495e',
             borderRadius: '5px',
             fontSize: '13px',
             lineHeight: '1.6'
           }}>
-            <strong>CSV Format:</strong>
-            <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
-              <li>Must have 2 or 3 columns</li>
-              <li>First row should be headers: owner, name, definition(optional)</li>
-              <li>Each row represents a parent-child relationship</li>
-              <li>The root node does not get it's own row (Do not include _,root)</li>
-              <li>Definitions should be surrounded by double quotes</li>
-              <li>The visualizer can only plot up to 60 nodes without overlap</li>
-            </ul>
-            <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
-              Example:<br />
-              owner,name,definition<br />
-              root,child1<br />
-              root,child2,"This is child two."
+            {/* Header / toggle line */}
+            <div
+              onClick={() => setShowCsvInfo(!showCsvInfo)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                userSelect: 'none',
+                fontWeight: 'bold',
+                fontSize: '14px',
+              }}
+            >
+              <span>CSV Format Information</span>
+              <span style={{ fontSize: '16px' }}>
+                {showCsvInfo ? '▼' : '▶'}
+              </span>
             </div>
+
+            {/* Collapsible content */}
+            {showCsvInfo && (
+              <div style={{ marginTop: '10px', transition: 'max-height 0.3s ease' }}>
+                <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
+                  <li>Must have 2 or 3 columns</li>
+                  <li>First row should be headers: owner, name, definition(optional)</li>
+                  <li>Each row represents a parent-child relationship</li>
+                  <li>The root node does not get it's own row (Do not include _,root)</li>
+                  <li>The visualizer can only plot up to 50 nodes without overlap</li>
+                </ul>
+                <div style={{ marginTop: '10px', fontSize: '12px', fontStyle: 'italic' }}>
+                  Example:<br />
+                  owner,name,definition<br />
+                  root,child1<br />
+                  root,child2,"This is child two."
+                </div>
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: '20px' }}>
             <label style={{ fontSize: '14px', display: 'block', marginTop: '10px', marginBottom: '8px' }}>
               <strong>Try an example:</strong>
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {Object.keys(exampleCSVs).map(name => (
                 <div key={name}>
                   <button
@@ -364,7 +389,8 @@ function App() {
                     fontSize: '11px',
                     color: '#95a5a6',
                     marginTop: '4px',
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
+                    paddingBottom: '10px'
                   }}>
                     {exampleDescriptions[name]}
                   </div>
@@ -399,7 +425,7 @@ function App() {
               <div style={{ fontSize: '80px' }}>{`\u{1F332}`}</div>
               <h2 style={{ fontSize: '48px', margin: '0' }}>Interactive Tree Visualizer</h2>
               <p style={{ fontSize: '18px', margin: '0' }}>
-                Select a CSV file and click "Upload & Visualize" to get started
+                Select a CSV file and click "Upload & Visualize" or select an example to get started
               </p>
             </div>
           )}
