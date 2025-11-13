@@ -406,13 +406,36 @@ const TreeVisualization = ({ treeData }) => {
     update(root);
     const totalNodes = countAllNodes(root);
     setNodeCount(totalNodes);
-
+    
+    // Set initial zoom position
     const initialScale = 0.3;
     const initialTranslateX = (containerWidth / 2) - (width * initialScale / 2);
     const initialTranslateY = 50;
     svg.call(zoom.transform, d3.zoomIdentity
       .translate(initialTranslateX, initialTranslateY)
       .scale(initialScale));
+
+    // Fit to screen on initial load
+    setTimeout(() => {
+      const bounds = mainGroup.node().getBBox();
+      const padding = 50;
+      const fullWidth = bounds.width;
+      const fullHeight = bounds.height;
+
+      const scale = Math.min(
+        (containerWidth - padding * 2) / fullWidth,
+        (containerHeight - padding * 2) / fullHeight
+      );
+
+      const translateX = (containerWidth / 2) - ((bounds.x + fullWidth / 2) * scale);
+      const translateY = (containerHeight / 2) - ((bounds.y + fullHeight / 2) * scale);
+
+      svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity
+          .translate(translateX, translateY)
+          .scale(scale));
+    }, 400);
 
     // Attach helpers for button
     rootRef.current.expand = expand;
