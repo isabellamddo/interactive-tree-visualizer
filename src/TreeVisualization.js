@@ -303,8 +303,22 @@ const TreeVisualization = ({ treeData }) => {
 
             // Position centered below the node
             const tooltipWidth = tooltipNode.offsetWidth;
-            const left = nodeElement.left + (nodeElement.width / 2) - (tooltipWidth / 2);
-            const top = nodeElement.bottom + 10;
+            const tooltipHeight = tooltipNode.offsetHeight;
+            let left = nodeElement.left + (nodeElement.width / 2) - (tooltipWidth / 2);
+            let top = nodeElement.bottom + 10;
+
+            // Keep tooltip within viewport horizontally
+            if (left < 10) {
+              left = 10;
+            }
+            if (left + tooltipWidth > window.innerWidth - 10) {
+              left = window.innerWidth - tooltipWidth - 10;
+            }
+
+            // Keep tooltip within viewport vertically
+            if (top + tooltipHeight > window.innerHeight - 10) {
+              top = nodeElement.top - tooltipHeight - 10;
+            }
 
             tooltip.style('left', left + 'px')
               .style('top', top + 'px');
@@ -406,7 +420,7 @@ const TreeVisualization = ({ treeData }) => {
     update(root);
     const totalNodes = countAllNodes(root);
     setNodeCount(totalNodes);
-    
+
     // Set initial zoom position
     const initialScale = 0.3;
     const initialTranslateX = (containerWidth / 2) - (width * initialScale / 2);
