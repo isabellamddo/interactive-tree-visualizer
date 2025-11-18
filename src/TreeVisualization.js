@@ -340,11 +340,49 @@ const TreeVisualization = ({ treeData }) => {
         const nodeGroup = d3.select(this).append('g').attr('class', 'text-group');
         const text = nodeGroup.append('text')
           .attr('text-anchor', 'middle')
-          .attr('dy', '0.35em')
           .style('font-family', 'Arial, sans-serif')
           .style('font-size', '11px')
-          .style('pointer-events', 'all')
-          .text(getNodeName(node));
+          .style('pointer-events', 'all');
+
+        // Text wrapping
+        const words = getNodeName(node).split(/\s+/);
+        const maxWidth = 120;
+        const lineHeight = 1.2;
+        let line = [];
+        const lines = [];
+
+        for (let i = 0; i < words.length; i++) {
+          line.push(words[i]);
+          const testLine = line.join(' ');
+
+          const tempText = nodeGroup.append('text')
+            .style('font-family', 'Arial, sans-serif')
+            .style('font-size', '11px')
+            .style('visibility', 'hidden')
+            .text(testLine);
+          const testWidth = tempText.node().getComputedTextLength();
+          tempText.remove();
+
+          if (testWidth > maxWidth && line.length > 1) {
+            line.pop();
+            lines.push(line.join(' '));
+            line = [words[i]];
+          }
+
+          if (i === words.length - 1) {
+            lines.push(line.join(' '));
+          }
+        }
+
+        // Add all lines as tspans
+        const totalLines = lines.length;
+
+        lines.forEach((lineText, index) => {
+          text.append('tspan')
+            .attr('x', 0)
+            .attr('dy', index === 0 ? '0.35em' : lineHeight + 'em')
+            .text(lineText);
+        });
 
         // Measure text size to fit in shape
         const bbox = text.node().getBBox();
@@ -354,6 +392,12 @@ const TreeVisualization = ({ treeData }) => {
         const canExpand = node.children || node._children;
 
         if (canExpand) {
+          // Center multi-line text vertically in ellipses
+          if (totalLines > 1) {
+            const offsetY = -((totalLines - 1) * lineHeight * 11) / 2;
+            text.attr('transform', `translate(0, ${offsetY})`);
+          }
+
           // Ellipse for expandable nodes
           const ellipse = nodeGroup.append('ellipse')
             .attr('cx', 0)

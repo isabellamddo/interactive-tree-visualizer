@@ -1,11 +1,12 @@
 import TreeVisualization from './TreeVisualization';
 import './App.css';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx'
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
   "US Counties": "/uscounties_clean_small.csv",
-  "CNU CS Curriculum" : "/cnucs.csv",
+  "CNU CS Curriculum": "/cnucs.csv",
   "Human Anatomy": "/humananatomy.csv",
   "Minecraft Crafting": "/minecraftcrafting.csv",
   "Computer Architecture": "computerarchitecture.csv"
@@ -13,7 +14,7 @@ const exampleCSVs = {
 
 const exampleDescriptions = {
   "US Counties": "A small tree with 20+ nodes showing US states and counties. ",
-  "CNU CS Curriculum" : "CNU's Computer Science courses in order of their pre/corequisites.Source: CNU Undergraduate Cataloge Vol. 60",
+  "CNU CS Curriculum": "CNU's Computer Science courses in order of their pre/corequisites.Source: CNU Undergraduate Cataloge Vol. 60",
   "Human Anatomy": "A large tree with 40+ nodes showing human body systems, organs, and their components with definitions.",
   "Minecraft Crafting": "A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft. Paraphrased from the Minecraft Wiki.",
   "Computer Architecture": "A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates. Paraphrased from Patterson & Hennessy (Computer Organization and Design) and Wikipedia's 'Memory hierarchy'."
@@ -118,41 +119,79 @@ function App() {
     setUploadAttempted(true);
 
     if (file) {
+      const fileExtension = file.name.split('.').pop().toLowerCase();
       const fileReader = new FileReader();
-      fileReader.onload = function (event) {
-        const csvOutput = event.target.result;
 
-        // Parse with PapaParse
-        const parsed = Papa.parse(csvOutput, {
-          header: true,
-          skipEmptyLines: true
-        });
+      if (fileExtension === 'csv') {
+        fileReader.onload = function (event) {
+          const csvOutput = event.target.result;
 
-        // Validate headers
-        const headers = Object.keys(parsed.data[0] || {});
+          // Parse with PapaParse
+          const parsed = Papa.parse(csvOutput, {
+            header: true,
+            skipEmptyLines: true
+          });
 
-        if (!headers.includes('owner') || !headers.includes('name')) {
-          setError('Missing required columns: owner and name');
-          return;
-        }
+          // Validate headers
+          const headers = Object.keys(parsed.data[0] || {});
 
-        setError('');
+          if (!headers.includes('owner') || !headers.includes('name')) {
+            setError('Missing required columns: owner and name');
+            return;
+          }
 
-        const data = parsed.data.map(row => ({
-          owner: row.owner,
-          name: row.name,
-          definition: row.definition || null
-        }));
+          setError('');
 
-        try {
-          const tree = buildTree(data);
-          setTreeData(tree);
-        } catch (err) {
-          setError(err.message);
-        }
-      };
+          const data = parsed.data.map(row => ({
+            owner: row.owner,
+            name: row.name,
+            definition: row.definition || null
+          }));
 
-      fileReader.readAsText(file);
+          try {
+            const tree = buildTree(data);
+            setTreeData(tree);
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+
+        fileReader.readAsText(file);
+      } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        fileReader.onload = function (event) {
+          const data = event.target.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Validate headers
+          const headers = Object.keys(jsonData[0] || {});
+
+          if (!headers.includes('owner') || !headers.includes('name')) {
+            setError('Missing required columns: owner and name');
+            return;
+          }
+
+          setError('');
+
+          const parsedData = jsonData.map(row => ({
+            owner: row.owner,
+            name: row.name,
+            definition: row.definition || null
+          }));
+
+          try {
+            const tree = buildTree(parsedData);
+            setTreeData(tree);
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+        fileReader.readAsBinaryString(file);
+      } else {
+        setError('Unsupported file format. Please upload CSV or XLSX files.');
+      }
     }
   };
   return (
@@ -192,7 +231,7 @@ function App() {
           opacity: sidebarOpen ? 1 : 0,
           transition: '0.3s ease',
         }}>
-          <h1>Upload CSV</h1>
+          <h1>Upload CSV/XLSX</h1>
           <form>
             <label
               htmlFor="csvFileInput"
@@ -211,13 +250,13 @@ function App() {
             >
               <div style={{ fontSize: '40px', marginBottom: '10px' }}>{`\u{1F4C1}`}</div>
               <div style={{}}>
-                {file ? file.name : 'Click to select CSV file'}
+                {file ? file.name : 'Click to select a file'}
               </div>
             </label>
             <input
               type="file"
               id="csvFileInput"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               onChange={handleOnChange}
               style={{ display: 'none' }}
             />
@@ -260,7 +299,7 @@ function App() {
               opacity: fadeOut ? 0 : 1,
               transition: 'opacity 1s ease'
             }}>
-              Must select a CSV file to upload!
+              Must select a file to upload!
             </div>
           )}
 
@@ -335,7 +374,7 @@ function App() {
                 fontSize: '14px',
               }}
             >
-              <span>CSV Format Information</span>
+              <span>File Upload Information</span>
               <span style={{ fontSize: '16px' }}>
                 {showCsvInfo ? '▼' : '▶'}
               </span>
@@ -344,6 +383,7 @@ function App() {
             {/* Collapsible content */}
             {showCsvInfo && (
               <div style={{ marginTop: '10px', transition: 'max-height 0.3s ease' }}>
+                Accepted file formats: <b>CSV, XLSX & XLS</b>
                 <ul style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
                   <li>Must have 2 or 3 columns</li>
                   <li>First row should be headers: owner, name, definition(optional)</li>
@@ -425,7 +465,7 @@ function App() {
               <div style={{ fontSize: '80px' }}>{`\u{1F332}`}</div>
               <h2 style={{ fontSize: '48px', margin: '0' }}>Interactive Tree Visualizer</h2>
               <p style={{ fontSize: '18px', margin: '0' }}>
-                Select a CSV file and click "Upload & Visualize" or select an example to get started
+                Select a file and click "Upload & Visualize" or select an example to get started
               </p>
             </div>
           )}
