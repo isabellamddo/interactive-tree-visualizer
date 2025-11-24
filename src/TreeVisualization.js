@@ -227,7 +227,7 @@ const TreeVisualization = ({ treeData }) => {
       // NODE POSITIONING
       for (const node of allNodes) {
         node.y = node.depth * 150 + margin.top; // Vretical spacing based on depth
-        node.x = node.x + margin.left;
+        node.x = node.x * 1.5 + margin.left;
       }
 
       // Staggering to condense diagram

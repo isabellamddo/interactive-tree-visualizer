@@ -5,19 +5,29 @@ import * as XLSX from 'xlsx'
 import React, { useState, useEffect } from 'react';
 import { buildTree } from './tree.js';
 const exampleCSVs = {
-  "US Counties": "/uscounties_clean_small.csv",
   "CNU CS Curriculum": "/cnucs.csv",
   "Human Anatomy": "/humananatomy.csv",
   "Minecraft Crafting": "/minecraftcrafting.csv",
-  "Computer Architecture": "computerarchitecture.csv"
+  "Computer Architecture": "computerarchitecture.csv",
+  "Animal Taxonomy": "/animaltaxonomy.csv",
+  "Project Breakdown": "/projectbreakdown.csv",
+  "Treatment Decision Tree": "/treatmentdecisiontree.csv",
+  "Dewey Decimal": "/librarysystem.csv",
+  "Corporate Org Chart":"/orgchart.csv",
+  "US Counties": "/uscounties_clean_small.csv"
 }
 
 const exampleDescriptions = {
-  "US Counties": "A small tree with 20+ nodes showing US states and counties. ",
-  "CNU CS Curriculum": "CNU's Computer Science courses in order of their pre/corequisites.Source: CNU Undergraduate Cataloge Vol. 60",
-  "Human Anatomy": "A large tree with 40+ nodes showing human body systems, organs, and their components with definitions.",
-  "Minecraft Crafting": "A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft. Paraphrased from the Minecraft Wiki.",
-  "Computer Architecture": "A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates. Paraphrased from Patterson & Hennessy (Computer Organization and Design) and Wikipedia's 'Memory hierarchy'."
+  "CNU CS Curriculum": "Education: CNU's Computer Science courses in order of their pre/corequisites. Source: CNU Undergraduate Catalog Vol. 60",
+  "Human Anatomy": "Biology: A large tree with 40+ nodes showing human body systems, organs, and their components with definitions.",
+  "Minecraft Crafting": "Gaming: A small tree showing crafting progression tree to create tools, weapons, and advanced items in Minecraft. Paraphrased from the Minecraft Wiki.",
+  "Computer Architecture": "Technology: A large tree that breaks down a computer system from the top-level hardware and software components down to individual transistors and logic gates. Paraphrased from Patterson & Hennessy (Computer Organization and Design) and Wikipedia's 'Memory hierarchy'.",
+  "Animal Taxonomy": "Biology: Illustrates hierarchical classification from Kingdom Animalia to species level, including cats, dogs, and humans with scientific definitions. Sources: Animal Diversity Web, Wikipedia, StudySmarter, Biology LibreTexts, and Britannica.",
+  "Project Breakdown": "Business: Project breakdown structure for a website redesign, organized into five phases from Planning through Launch with specific deliverables.",
+  "Treatment Decision Tree": "Healthcare: Clinical decision tree for diabetes diagnosis and treatment, showing distinct pathways for Type 1 and Type 2 with medication and care options.",
+  "Dewey Decimal": "Library Science: Simplified view of the library classification system, showing how knowledge divides into main classes and specific subdivisions.",
+  "Corporate Org Chart":"Business: Corporate org chart showing typical company hierarchy from CEO through executive leadership to departments and teams. Demonstrates reporting structures in a mid-size technology company.",
+  "US Counties": "Geography: A small tree with 20+ nodes showing US states and counties.",
 };
 
 function App() {
@@ -231,7 +241,7 @@ function App() {
           opacity: sidebarOpen ? 1 : 0,
           transition: '0.3s ease',
         }}>
-          <h1>Upload CSV/XLSX</h1>
+          <h1>Upload File</h1>
           <form>
             <label
               htmlFor="csvFileInput"

@@ -1,0 +1,31 @@
+owner,name
+Corporate Organizational Chart,CEO
+CEO,Chief Technology Officer
+CEO,Chief Financial Officer
+CEO,Chief Marketing Officer
+CEO,Chief Operating Officer
+Chief Technology Officer,VP of Engineering
+VP of Engineering,Software Development
+Software Development,Frontend Team
+Software Development,Backend Team
+Software Development,Mobile Team
+VP of Engineering,IT Operations
+IT Operations,Infrastructure Team
+IT Operations,Security Team
+Chief Financial Officer,VP of Finance
+VP of Finance,Accounting Department
+Accounting Department,Accounts Payable
+Accounting Department,Accounts Receivable
+VP of Finance,Financial Planning
+Chief Marketing Officer,VP of Marketing
+VP of Marketing,Digital Marketing
+Digital Marketing,Social Media Team
+Digital Marketing,Content Team
+VP of Marketing,Brand Management
+Chief Operating Officer,VP of Operations
+VP of Operations,Customer Support
+Customer Support,Technical Support
+Customer Support,Customer Success
+VP of Operations,Human Resources
+Human Resources,Recruitment
+Human Resources,Employee Relations
