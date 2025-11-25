@@ -1,0 +1,39 @@
+owner,name
+United States of America,West
+United States of America,Midwest
+United States of America,South
+United States of America,Northeast
+West,Arizona
+West,California
+West,Utah
+West,Washington
+Midwest,Illinois
+Midwest,Michigan
+Midwest,Minnesota
+Midwest,Ohio
+South,Florida
+South,Texas
+South,North Carolina
+South,Virginia
+Northeast,Connecticut
+Northeast,Massachusetts
+Northeast,New York
+Northeast,Pennsylvania
+Illinois,Cook County
+Texas,Harris County
+Arizona,Maricopa County
+California,Orange County
+New York,Kings County
+Texas,Dallas County
+New York,Queens County
+Washington,King County
+Texas,Tarrant County
+Texas,Bexar County
+Michigan,Wayne County
+California,Alameda County
+New York,New York County
+Massachusetts,Middlesex County
+California,Sacramento County
+Pennsylvania,Philadelphia County
+Florida,Orange County
+New York,Bronx County
