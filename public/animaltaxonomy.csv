@@ -1,0 +1,17 @@
+owner,name,definition
+Kingdom Animalia,Phylum Chordata,Animals possessing a notochord, hollow dorsal nerve cord, pharyngeal slits, and post-anal tail at some life stage
+Phylum Chordata,Class Mammalia,Warm-blooded animals that produce milk to feed their young and maintain constant body temperature
+Class Mammalia,Order Carnivora,Placental mammals specialized primarily in eating flesh, comprising at least 279 species
+Order Carnivora,Family Felidae,Cats characterized by digitigrade locomotion with five toes on forefeet and four on hind feet
+Family Felidae,Genus Panthera,Large cats with incompletely ossified hyoid bone and specially adapted larynx enabling most to roar
+Genus Panthera,Species Lion,Large powerfully built cat that is second in size only to the tiger
+Genus Panthera,Species Tiger,Largest member of the cat family rivaled only by the lion in strength and ferocity
+Genus Panthera,Species Leopard,Large cat closely related to the lion, tiger, and jaguar
+Order Carnivora,Family Canidae,Dog-like carnivorans with long muzzles, upright ears, long legs, and bushy tails
+Family Canidae,Genus Canis,Species distinguished by moderate to large size, massive skulls and dentition, long legs, and comparatively short ears and tails
+Genus Canis,Species Wolf,Largest wild extant member of Canidae with less pointed ears and muzzle than other Canis species
+Genus Canis,Species Dog,Domesticated descendant of the gray wolf selectively bred over 14,000 years ago
+Class Mammalia,Order Primates,Mammals including lemurs, tarsiers, monkeys, apes, and humans
+Order Primates,Family Hominidae,Great apes including orangutans, gorillas, chimpanzees and humans
+Family Hominidae,Genus Homo,Great apes that emerged from Australopithecus, with single extant species Homo sapiens
+Genus Homo,Species Human,Characterized by large cranial capacity, erect posture, bipedal gait, and ability to make standardized precision tools

@@ -1,0 +1,25 @@
+owner,name
+Diabetes Management,Initial Assessment
+Initial Assessment,Blood Sugar Test
+Initial Assessment,HbA1c Test
+Initial Assessment,Type 1 Diagnosis
+Initial Assessment,Type 2 Diagnosis
+Type 1 Diagnosis,Type 1 Treatment Plan
+Type 1 Treatment Plan,Insulin Therapy
+Insulin Therapy,Rapid-Acting Insulin
+Insulin Therapy,Long-Acting Insulin
+Type 1 Treatment Plan,Blood Glucose Monitoring
+Type 1 Treatment Plan,Dietary Management
+Type 2 Diagnosis,Type 2 Treatment Plan
+Type 2 Treatment Plan,Lifestyle Modifications
+Lifestyle Modifications,Diet Changes
+Lifestyle Modifications,Exercise Program
+Type 2 Treatment Plan,Oral Medications
+Oral Medications,Metformin
+Oral Medications,Sulfonylureas
+Type 2 Treatment Plan,Advanced Treatment
+Advanced Treatment,Injectable Medications
+Advanced Treatment,Insulin Therapy T2
+Diabetes Management,Follow-up Care
+Follow-up Care,Regular Monitoring
+Follow-up Care,Complication Screening

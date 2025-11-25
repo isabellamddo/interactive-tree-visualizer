@@ -1,0 +1,28 @@
+owner,name
+Website Redesign Project,Phase 1 - Planning
+Phase 1 - Planning,Requirements Gathering
+Requirements Gathering,Stakeholder Interviews
+Requirements Gathering,User Research
+Phase 1 - Planning,Project Charter
+Phase 1 - Planning,Budget Approval
+Website Redesign Project,Phase 2 - Design
+Phase 2 - Design,Wireframes
+Wireframes,Homepage Wireframe
+Wireframes,Product Page Wireframe
+Wireframes,Checkout Wireframe
+Phase 2 - Design,Visual Design
+Visual Design,Style Guide
+Visual Design,Mockups
+Website Redesign Project,Phase 3 - Development
+Phase 3 - Development,Frontend Development
+Frontend Development,HTML/CSS Implementation
+Frontend Development,React Components
+Phase 3 - Development,Backend Development
+Backend Development,API Development
+Backend Development,Database Setup
+Website Redesign Project,Phase 4 - Testing
+Phase 4 - Testing,Quality Assurance
+Phase 4 - Testing,User Acceptance Testing
+Website Redesign Project,Phase 5 - Launch
+Phase 5 - Launch,Deployment
+Phase 5 - Launch,Post-Launch Monitoring
